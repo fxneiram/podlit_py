@@ -1,9 +1,6 @@
-import os
-from pydub import AudioSegment
 from moviepy.editor import AudioFileClip, ColorClip, ImageClip, VideoFileClip, concatenate_videoclips
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
-from tqdm import tqdm
 import config as cfg
 
 
