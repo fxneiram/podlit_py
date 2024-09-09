@@ -1,6 +1,5 @@
 import torch
 from TTS.api import TTS
-from pydub import AudioSegment
 from tqdm import tqdm
 import os
 import config as cfg
