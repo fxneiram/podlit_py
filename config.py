@@ -1,6 +1,7 @@
 # FOLDER PATHS
 TEMP_AUDIO_DIR = 'temp_audio_files'
 TEMP_VIDEO_DIR = 'temp_video_files'
+OUTPUT_DIR = 'output'
 
 # COLORS
 BACKGROUND_COLOR = (0, 0, 0)
