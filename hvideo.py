@@ -56,6 +56,8 @@ def combine_video_fragments(fragments, output_path):
         color=cfg.BACKGROUND_COLOR,
         duration=delay_duration)
 
+    clips.append(delay_clip)
+    
     for fragment in fragments:
         video_clip = VideoFileClip(fragment)
         clips.append(video_clip)

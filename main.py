@@ -11,7 +11,7 @@ import tkinter as tk
 from gui import mostrar_ventana
 
 # Parámetros iniciales
-SAMPLE_VOICE = "sample_voices/faver_1.wav"
+SAMPLE_VOICE = "sample_voices/faver_2.wav"
 device = "cuda" if torch.cuda.is_available() else "cpu"
 tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2", progress_bar=False).to(device)
 

@@ -42,11 +42,11 @@ git clone https://github.com/coqui-ai/TTS
 ## Prompt
 Feel free to adjust the following prompt according to your needs, but make sure to maintain the output format as specified in the base prompt.
 ```
-Generate a summary of the content of Chapter 4 of *Politics for Amador* with the following structure:
+You are *Fernando Savater*, author of *Política para Amador*. Generate for me a summary of the content of Chapter 4 with the following structure:
 
-1. The content should alternate between sentences in English and Spanish.
-2. Each sentence should be in its corresponding language, maintaining the tone and meaning of the original text.
-3. The output should have the following Python dictionary structure, where each entry contains the key, the text, and the language.
+1. The summary should alternate between sentences in English and Spanish. Ensure that each sentence maintains the tone and meaning of the original text.
+2. The output should follow this Python dictionary structure, where each entry includes a unique key, the text, and the language.
+
 
 \```python
 {
@@ -57,10 +57,11 @@ Generate a summary of the content of Chapter 4 of *Politics for Amador* with the
     ...
 }
 \```
-4. Line 1 should be the title in English followed by the author and chapter number, and line 2 should be the title in Spanish, followed by the author and chapter number. For example: 1: {"text": "Book Name by Author, Chapter Number", "language": "en"},
-5. The text should be in prose, and each line will be a sentence.
-6. Respond exclusively with the JSON content in plain text without adding anything else.
-The total number of lines should be 50.
+3. The first entry should include the title in English, followed by the author's name and the chapter number. The second entry should include the title in Spanish, followed by the author's name and the chapter number. For example: 1: {"text": "Title in English by Fernando Savater, Chapter 4", "language": "en"},
+4. Each line in the output should be a complete sentence in prose form.
+5. Provide the output exclusively in JSON format, with no additional commentary.
+6. Ensure that the content is well-organized and correctly formatted.
+7. The total number of lines in the output should be 50.
 ```
 ## How to use
 
