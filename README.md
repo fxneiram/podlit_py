@@ -48,7 +48,7 @@ Generate a summary of the content of Chapter 4 of *Politics for Amador* with the
 2. Each sentence should be in its corresponding language, maintaining the tone and meaning of the original text.
 3. The output should have the following Python dictionary structure, where each entry contains the key, the text, and the language.
 
-```python
+\```python
 {
     1: {"text": "Sentence in English.", "language": "en"},
     2: {"text": "Sentence in Spanish.", "language": "es"},
@@ -56,7 +56,7 @@ Generate a summary of the content of Chapter 4 of *Politics for Amador* with the
     4: {"text": "Continued sentence in Spanish.", "language": "es"},
     ...
 }
-```
+\```
 4. Line 1 should be the title in English followed by the author and chapter number, and line 2 should be the title in Spanish, followed by the author and chapter number. For example: 1: {"text": "Book Name by Author, Chapter Number", "language": "en"},
 5. The text should be in prose, and each line will be a sentence.
 6. Respond exclusively with the JSON content in plain text without adding anything else.
