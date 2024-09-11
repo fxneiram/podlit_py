@@ -20,20 +20,22 @@ Run the following command (this differs from the command you get from the PyTorc
 Put the following into a script called "test_cuda.py" in the TTS folder:
 
 ## Prompt
-Genera un resumen del contenido de **[inserta aquí el título del libro o cuento]** con la siguiente estructura:
+Genera un resumen del contenido de el capitulo 4 de politica para amador con la siguiente estructura:
 
 1. El contenido debe alternar entre frases en inglés y español.
 2. Cada frase debe estar en su idioma correspondiente, manteniendo el tono y el significado del texto original.
 3. La salida debe tener la siguiente estructura de diccionario en Python, donde cada entrada contiene la clave, el texto, y el idioma.
 
-```python
-text_to_speak = {
+python
+{
     1: {"text": "Frase en inglés.", "language": "en"},
     2: {"text": "Frase en español.", "language": "es"},
-    3: {"text": "Frase en inglés.", "language": "en"},
-    4: {"text": "Frase en español.", "language": "es"},
+    3: {"text": "Continua frase en inglés.", "language": "en"},
+    4: {"text": "Continua frase en español.", "language": "es"},
     ...
 }
-```
-4. La linea 1 debe ser el título en inglés, la linea 2, el título en español
-5. el total de lineas debe ser **[numero de lineas deseadas]**
+
+4. La linea 1 debe ser el título en inglés seguido del autor y el capitulo, la linea 2, el título en español, seguido  autor y capitulo, ejemplo: 1: {"text": "_Book Name_ by _Author_, _Chapter Number_", "language": "en"},
+5. El texto debe ser en prosa, y cada linea será una frase
+5. Responde exclusivamente con el contenido json en texto plano sin añadir más
+6. El total de lineas debe ser 50

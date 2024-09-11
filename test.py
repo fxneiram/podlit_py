@@ -28,8 +28,12 @@ def generar_archivos(text_to_speak):
 
     # Procesar cada entrada de texto
     for i, entry in tqdm(text_to_speak.items(), desc="Generando archivos de audio", unit="file"):
-        text = entry["text"]
         language = entry["language"]
+
+        text = entry["text"]
+        if text[-1] == ".":
+            text = text[:-1]
+        
 
         audio_path = os.path.join(cfg.TEMP_AUDIO_DIR, f"temp_{i}.wav")
         video_path = os.path.join(cfg.TEMP_VIDEO_DIR, f"temp_{i}.mp4")
@@ -47,6 +51,10 @@ def generar_archivos(text_to_speak):
     # Limpiar archivos temporales
     hfiles.clean_temp_folders()
 
+# Función para cerrar la aplicación después de que la tarea se complete
+def on_close():
+    root.quit()  # Salir del loop de tkinter
+
 # Función principal
 if __name__ == "__main__":
     # Crear la ventana principal (padre de la ventana flotante)
@@ -54,7 +62,7 @@ if __name__ == "__main__":
     root.withdraw()  # Ocultar la ventana principal
 
     # Mostrar la ventana flotante y pasar la función de callback para generar archivos
-    mostrar_ventana(generar_archivos)
+    mostrar_ventana(generar_archivos, on_close)
 
     # Iniciar el bucle principal de tkinter
     root.mainloop()
