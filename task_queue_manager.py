@@ -13,6 +13,7 @@ class TaskQueueManager:
         self.root.title("Pod Lit Py")
 
         self.task_queue = []
+        self.task_delay = 5 * 60 * 1000  # 5 minutes
 
         top_frame = tk.Frame(root)
         top_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
@@ -92,32 +93,30 @@ class TaskQueueManager:
 
         self.init_media_generator()
 
-        total_tasks = len(self.task_queue)
         self.task_queue_index = 0
+        self.process_next_task()
 
-        def process_next_task():
-            if self.task_queue_index >= total_tasks:
-                self.task_queue.clear()
-                self.tree.delete(*self.tree.get_children())
-                self.update_queue_progress(100)
-                return
+    def process_next_task(self):
+        if self.task_queue_index >= len(self.task_queue):
+            self.task_queue.clear()
+            self.tree.delete(*self.tree.get_children())
+            self.update_queue_progress(100)
+            return
 
-            task = self.task_queue[self.task_queue_index]
+        task = self.task_queue[self.task_queue_index]
 
-            task_thread = threading.Thread(target=self.process_task_in_thread, args=(task,))
-            task_thread.start()
+        task_thread = threading.Thread(target=self.process_task_in_thread, args=(task,))
+        task_thread.start()
 
-            def check_thread_done():
-                if task_thread.is_alive():
-                    self.root.after(100, check_thread_done)
-                else:
-                    self.task_queue_index += 1
-                    self.update_queue_progress(((self.task_queue_index) / total_tasks) * 100)
-                    self.root.after(100, process_next_task)
+        def check_thread_done():
+            if task_thread.is_alive():
+                self.root.after(100, check_thread_done)
+            else:
+                self.task_queue_index += 1
+                self.update_queue_progress(((self.task_queue_index) / len(self.task_queue)) * 100)
+                self.root.after(self.task_delay, self.process_next_task)
 
-            check_thread_done()
-
-        process_next_task()
+        check_thread_done()
 
     def process_task_in_thread(self, task):
         self.process_single_task(task)
