@@ -7,7 +7,7 @@ def combine_audio_fragments(fragments, output_path):
     silence = AudioSegment.silent(duration=cfg.DURATION_BETWEEN_FRAGMENTS)
 
     combined = silence
-    for file_path in tqdm(fragments, desc="Concatenando archivos de audio", unit="file"):
+    for file_path in tqdm(fragments, desc="Joining audio fragments.", unit="file"):
         segment = AudioSegment.from_wav(file_path)
         combined += segment + silence
 

@@ -4,12 +4,11 @@ import tkinter as tk
 
 class App:
     def __init__(self, root, generator):
-        self.generator = generator  # Instancia de AudioVideoGenerator
+        self.generator = generator
         self.root = root
         self.task_queue_app = TaskQueueManager(self.root)
     
     def process_task(self, text_to_speak):
-        """Procesa la tarea de generar los archivos de audio y video."""
         self.generator.generate_files(text_to_speak)
     
 
