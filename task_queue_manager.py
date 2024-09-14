@@ -34,7 +34,7 @@ class TaskQueueManager:
         frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
         
         self.tree = ttk.Treeview(frame, columns=("Task"), show='headings', height=8)
-        self.tree.heading("Task", text="Tareas en Cola")
+        self.tree.heading("Task", text="Task Queue")
         self.tree.grid(row=0, column=0, sticky="nsew")
         
         self.task_progress = ttk.Progressbar(frame, length=400, mode='determinate')
@@ -46,13 +46,13 @@ class TaskQueueManager:
         button_frame = tk.Frame(root)
         button_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
         
-        self.add_task_button = tk.Button(button_frame, text="Agregar Tarea", command=self.show_task_window)
+        self.add_task_button = tk.Button(button_frame, text="Add Task", command=self.show_task_window)
         self.add_task_button.grid(row=0, column=0, padx=5, pady=5)
         
-        self.process_tasks_button = tk.Button(button_frame, text="Procesar Tareas", command=self.process_tasks)
+        self.process_tasks_button = tk.Button(button_frame, text="Process Queue", command=self.process_tasks)
         self.process_tasks_button.grid(row=0, column=1, padx=5, pady=5)
         
-        self.clear_tasks_button = tk.Button(button_frame, text="Limpiar Tareas", command=self.clear_tasks)
+        self.clear_tasks_button = tk.Button(button_frame, text="Clean Queue", command=self.clear_tasks)
         self.clear_tasks_button.grid(row=0, column=2, padx=5, pady=5)
 
         root.grid_rowconfigure(1, weight=1)
@@ -78,7 +78,7 @@ class TaskQueueManager:
 
     def process_tasks(self):
         if not self.task_queue:
-            messagebox.showinfo("Información", "No hay tareas en la cola para procesar.")
+            messagebox.showinfo("Info", "No tasks to process.")
             return
 
         self.init_media_generator()
