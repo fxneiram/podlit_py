@@ -60,7 +60,8 @@ class AudioVideoGenerator:
                 hfiles.clean_temp_folders()
                 time.sleep(10)
                 break
-
+            except:
+                print("Error cleaning temp folders, trying again in 10 seconds")
 
 
 
