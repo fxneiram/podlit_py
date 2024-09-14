@@ -10,10 +10,9 @@ import threading
 class TaskQueueManager:
     def __init__(self, root):
         self.media_generator = None
-
         self.root = root
         self.root.title("Pod Lit Py")
-        
+
         self.task_queue = []
         
         top_frame = tk.Frame(root)
@@ -73,8 +72,17 @@ class TaskQueueManager:
         TaskWindow(self.root, self.add_task, self.on_task_window_close)
 
     def add_task(self, task):
+        # Only show the "text" from index 1 in the task in the treeview
+        if 1 in task and "text" in task[1]:
+            display_text = task[1]["text"]
+        else:
+            display_text = "Unknown Task"
+
+        # Add the full task to the queue for processing
         self.task_queue.append(task)
-        self.tree.insert("", "end", values=(task,))
+
+        # Display only the extracted text from index 1 in the Treeview
+        self.tree.insert("", "end", values=(display_text,))
 
     def process_tasks(self):
         if not self.task_queue:
@@ -110,8 +118,6 @@ class TaskQueueManager:
 
         process_next_task()
 
-
-
     def process_task_in_thread(self, task):
         self.process_single_task(task)
         self.task_progress['value'] = 100
@@ -136,7 +142,6 @@ class TaskQueueManager:
         self.root.update_idletasks()
 
     def on_task_window_close(self):
-        """Evento para manejar el cierre de la ventana flotante."""
         pass
 
     def init_media_generator(self):
