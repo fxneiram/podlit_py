@@ -10,8 +10,6 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import logging
-
-# Cambiar el nivel de logueo a ERROR para suprimir mensajes informativos
 logging.getLogger("moviepy").setLevel(logging.ERROR)
 
 
@@ -22,7 +20,6 @@ class AudioVideoGenerator:
         self.tts = TTS(model_path, progress_bar=False).to(self.device)
     
     def generate_files(self, text_to_speak, progress_callback=None):
-        """Genera archivos de audio y video a partir del texto proporcionado."""
         hfiles.create_work_folders()
         
         output_audio_path, output_video_path = hfiles.get_final_file_names(text_to_speak[1]["text"])
@@ -46,7 +43,6 @@ class AudioVideoGenerator:
             audio_paths.append(audio_path)
             video_paths.append(video_path)
 
-            # Actualizar progreso
             if progress_callback:
                 progress = (i + 1) / total_files * 100
                 progress_callback(progress)
