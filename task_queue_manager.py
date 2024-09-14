@@ -5,12 +5,23 @@ from tkinter import messagebox, ttk
 import threading
 from audio_video_generator import AudioVideoGenerator
 from task_window import TaskWindow
+from task_queue_treeview import TaskQueueTreeview  # Importamos la nueva clase
 
 class TaskQueueManager:
     def __init__(self, root):
         self.media_generator = None
         self.root = root
         self.root.title("Pod Lit Py")
+
+        window_width = 800
+        window_height = 400
+
+        self.root.geometry(f"{window_width}x{window_height}")
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        center_x = int(screen_width / 2 - window_width / 2)
+        center_y = int(screen_height / 2 - window_height / 2)
+        self.root.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}")
 
         self.task_queue = []
         self.task_delay = 5 * 60 * 1000  # 5 minutes
@@ -32,8 +43,8 @@ class TaskQueueManager:
         frame = tk.Frame(root)
         frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
 
-        self.tree = ttk.Treeview(frame, columns=("Task"), show='headings', height=8)
-        self.tree.heading("Task", text="Task Queue")
+        # Usamos la nueva clase TaskQueueTreeview
+        self.tree = TaskQueueTreeview(frame, self.task_queue, height=8)
         self.tree.grid(row=0, column=0, sticky="nsew")
 
         self.task_progress = ttk.Progressbar(frame, length=400, mode='determinate')
@@ -54,12 +65,6 @@ class TaskQueueManager:
         self.clear_tasks_button = tk.Button(button_frame, text="Clean Queue", command=self.clear_tasks)
         self.clear_tasks_button.grid(row=0, column=2, padx=5, pady=5)
 
-        # Create a menu for the Treeview
-        self.tree_menu = tk.Menu(root, tearoff=0)
-        self.tree_menu.add_command(label="Delete", command=self.delete_selected_task)
-
-        self.tree.bind("<Button-3>", self.show_context_menu)
-
         root.grid_rowconfigure(1, weight=1)
         root.grid_columnconfigure(0, weight=1)
         frame.grid_rowconfigure(1, weight=0)
@@ -69,22 +74,14 @@ class TaskQueueManager:
         button_frame.grid_columnconfigure(1, weight=1)
         button_frame.grid_columnconfigure(2, weight=1)
 
+
     def get_wav_files(self, folder_path):
         if not os.path.exists(folder_path):
             return []
         return [f for f in os.listdir(folder_path) if f.endswith(".wav")]
 
     def show_task_window(self):
-        TaskWindow(self.root, self.add_task, self.on_task_window_close)
-
-    def add_task(self, task):
-        if 1 in task and "text" in task[1]:
-            display_text = task[1]["text"]
-        else:
-            display_text = "Unknown Task"
-
-        self.task_queue.append(task)
-        self.tree.insert("", "end", values=(display_text,))
+        TaskWindow(self.root, self.tree.add_task, self.on_task_window_close)
 
     def process_tasks(self):
         if not self.task_queue:
@@ -133,8 +130,9 @@ class TaskQueueManager:
         self.tree.delete(*self.tree.get_children())
         self.update_queue_progress(0)
 
-    def update_progress(self, progress):
+    def update_progress(self, progress, status="Processing"):
         self.task_progress['value'] = progress
+        self.tree.update_progress_and_status(progress, status, self.task_queue_index)
         self.root.update_idletasks()
 
     def update_queue_progress(self, progress=0):
@@ -150,29 +148,6 @@ class TaskQueueManager:
         tts_model_path = "tts_models/multilingual/multi-dataset/xtts_v2"
 
         self.media_generator = AudioVideoGenerator(sample_voice, tts_model_path, device=device)
-
-    def delete_selected_task(self):
-        selected_items = self.tree.selection()
-        if not selected_items:
-            messagebox.showinfo("Info", "No task selected.")
-            return
-
-        for item in selected_items:
-            task_text = self.tree.item(item, 'values')[0]
-            self.tree.delete(item)
-
-            task_to_delete = None
-            for task in self.task_queue:
-                if task[1]["text"] == task_text:
-                    task_to_delete = task
-                    break
-
-            if task_to_delete:
-                self.task_queue.remove(task_to_delete)
-
-    def show_context_menu(self, event):
-        # Open the context menu at the location of the click
-        self.tree_menu.post(event.x_root, event.y_root)
 
     def run(self):
         self.root.mainloop()
