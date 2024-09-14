@@ -45,12 +45,21 @@ class AudioVideoGenerator:
 
             if progress_callback:
                 progress = (i + 1) / total_files * 100
-                progress_callback(progress)
+                progress_callback(progress, f"Processing fragment {i + 1}/{total_files}")
 
+        progress_callback(100, "Combining audio fragments")
         haudio.combine_audio_fragments(audio_paths, output_audio_path)
+        
+        progress_callback(100, "Combining video fragments")
         hvideo.combine_video_fragments(video_paths, output_audio_path.replace('.wav', '.mp4'))
-
-        hfiles.clean_temp_folders()
+        
+        progress_callback(100, "Done")
+        
+        while True:
+            try:
+                hfiles.clean_temp_folders()
+                time.sleep(10)
+                break
 
 
 

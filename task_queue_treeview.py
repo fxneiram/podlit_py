@@ -54,10 +54,7 @@ class TaskQueueTreeview(ttk.Treeview):
         self.menu.post(event.x_root, event.y_root)
 
 
-    def update_progress(self, progress):
-        self.task_progress['value'] = progress
-        self.root.update_idletasks()
-
-        task_id = self.tree.get_children()[self.task_queue_index]
-        self.tree.set(task_id, column="Progress", value=f"{int(progress)}%")
-
+    def update_progress_and_status(self, progress, status, index):
+        task_id = self.get_children()[index]
+        self.set(task_id, column="Progress", value=f"{int(progress)}%")
+        self.set(task_id, column="Status", value=status)

@@ -130,8 +130,9 @@ class TaskQueueManager:
         self.tree.delete(*self.tree.get_children())
         self.update_queue_progress(0)
 
-    def update_progress(self, progress):
+    def update_progress(self, progress, status="Processing"):
         self.task_progress['value'] = progress
+        self.tree.update_progress_and_status(progress, status, self.task_queue_index)
         self.root.update_idletasks()
 
     def update_queue_progress(self, progress=0):
