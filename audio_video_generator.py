@@ -6,6 +6,15 @@ import hvideo
 import haudio
 import hfiles
 
+import warnings
+warnings.filterwarnings("ignore")
+
+import logging
+
+# Cambiar el nivel de logueo a ERROR para suprimir mensajes informativos
+logging.getLogger("moviepy").setLevel(logging.ERROR)
+
+
 class AudioVideoGenerator:
     def __init__(self, sample_voice, model_path, device="cpu"):
         self.sample_voice = sample_voice
