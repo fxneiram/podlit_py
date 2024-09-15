@@ -28,6 +28,7 @@ class TaskQueueManager:
         self.task_delay = 5 * 60 * 1000  # 5 minutes
         self.task_queue_index = 0
 
+        # Top frame (voices selection)
         top_frame = tk.Frame(root)
         top_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
         top_frame.grid_columnconfigure(1, weight=1)
@@ -42,18 +43,22 @@ class TaskQueueManager:
         if self.voice_options:
             self.voice_combobox.current(0)
 
+        # Frame for treeview and progress bars
         frame = tk.Frame(root)
         frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
 
         self.tree = TaskQueueTreeview(frame, self.task_queue, height=8)
         self.tree.grid(row=0, column=0, sticky="nsew")
 
+        # Task progress bar
         self.task_progress = ttk.Progressbar(frame, length=400, mode='determinate')
         self.task_progress.grid(row=1, column=0, pady=5, sticky="ew")
 
+        # Queue progress bar
         self.queue_progress = ttk.Progressbar(frame, length=400, mode='determinate')
         self.queue_progress.grid(row=2, column=0, pady=5, sticky="ew")
 
+        # Buttons at the bottom
         button_frame = tk.Frame(root)
         button_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
 
@@ -66,14 +71,19 @@ class TaskQueueManager:
         self.clear_tasks_button = tk.Button(button_frame, text="Clean Queue", command=self.clear_tasks)
         self.clear_tasks_button.grid(row=0, column=2, padx=5, pady=5)
 
-        root.grid_rowconfigure(1, weight=1)
+        # Configure the root frame to adjust correctly with window resizing
+        root.grid_rowconfigure(1, weight=1)  # Make row 1 (frame with treeview) expandable
         root.grid_columnconfigure(0, weight=1)
-        frame.grid_rowconfigure(1, weight=0)
+
+        # Configure the frame with the treeview and progress bars
+        frame.grid_rowconfigure(0, weight=1)  # Make treeview row expandable
         frame.grid_columnconfigure(0, weight=1)
-        button_frame.grid_rowconfigure(0, weight=0)
+
+        # Button frame configuration to stay at the bottom
         button_frame.grid_columnconfigure(0, weight=1)
         button_frame.grid_columnconfigure(1, weight=1)
         button_frame.grid_columnconfigure(2, weight=1)
+
 
     def get_wav_files(self, folder_path):
         if not os.path.exists(folder_path):
