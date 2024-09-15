@@ -1,6 +1,6 @@
 from pydub import AudioSegment
 from tqdm import tqdm
-import config as cfg
+from pkg import config as cfg
 
 
 class AudioCombiner:

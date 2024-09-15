@@ -2,10 +2,10 @@ import os
 import time
 
 from TTS.api import TTS
-import config as cfg
-from mh.hvideo import VideoGenerator
-from mh.haudio import AudioCombiner
-import hfiles
+from pkg import config as cfg
+from fh.hvideo import VideoGenerator
+from fh.haudio import AudioCombiner
+from fh.hfiles import FileManager
 import logging
 import warnings
 
@@ -20,11 +20,12 @@ class AudioVideoGenerator:
         self.tts = TTS(model_path, progress_bar=False).to(self.device)
         self.audio_combiner = None
         self.video_generator = VideoGenerator()
+        self.file_manager = FileManager()
 
     def generate_files(self, text_to_speak, progress_callback=None):
-        hfiles.create_work_folders()
+        self.file_manager.create_work_folders()
 
-        output_audio_path, output_video_path = hfiles.get_final_file_names(text_to_speak[1]["text"])
+        output_audio_path, output_video_path = self.file_manager.get_final_file_names(text_to_speak[1]["text"])
 
         audio_paths = []
         video_paths = []
@@ -60,7 +61,7 @@ class AudioVideoGenerator:
 
         while True:
             try:
-                hfiles.clean_temp_folders()
+                self.file_manager.clean_temp_folders()
                 time.sleep(10)
                 break
             except Exception as e:

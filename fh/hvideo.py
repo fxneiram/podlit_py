@@ -1,7 +1,7 @@
 from moviepy.editor import AudioFileClip, ColorClip, ImageClip, VideoFileClip, concatenate_videoclips
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
-import config as cfg
+from pkg import config as cfg
 
 
 class VideoGenerator:
