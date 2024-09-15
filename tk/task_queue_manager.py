@@ -4,8 +4,9 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 import threading
 from audio_video_generator import AudioVideoGenerator
-from task_window import TaskWindow
-from task_queue_treeview import TaskQueueTreeview  # Importamos la nueva clase
+from .task_window import TaskWindow
+from .task_queue_treeview import TaskQueueTreeview
+
 
 class TaskQueueManager:
     def __init__(self, root):
@@ -25,6 +26,7 @@ class TaskQueueManager:
 
         self.task_queue = []
         self.task_delay = 5 * 60 * 1000  # 5 minutes
+        self.task_queue_index = 0
 
         top_frame = tk.Frame(root)
         top_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
@@ -43,7 +45,6 @@ class TaskQueueManager:
         frame = tk.Frame(root)
         frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
 
-        # Usamos la nueva clase TaskQueueTreeview
         self.tree = TaskQueueTreeview(frame, self.task_queue, height=8)
         self.tree.grid(row=0, column=0, sticky="nsew")
 
@@ -73,7 +74,6 @@ class TaskQueueManager:
         button_frame.grid_columnconfigure(0, weight=1)
         button_frame.grid_columnconfigure(1, weight=1)
         button_frame.grid_columnconfigure(2, weight=1)
-
 
     def get_wav_files(self, folder_path):
         if not os.path.exists(folder_path):
@@ -110,7 +110,8 @@ class TaskQueueManager:
                 self.root.after(100, check_thread_done)
             else:
                 self.task_queue_index += 1
-                self.update_queue_progress(((self.task_queue_index) / len(self.task_queue)) * 100)
+                queue_progress = int((self.task_queue_index / len(self.task_queue)) * 100)
+                self.update_queue_progress(queue_progress)
                 self.root.after(self.task_delay, self.process_next_task)
 
         check_thread_done()

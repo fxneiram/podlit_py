@@ -3,3 +3,5 @@
 /output
 /__pycache__
 /TTS
+/.idea
+/*/__pycache__
