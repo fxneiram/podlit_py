@@ -1,5 +1,4 @@
-from audio_video_generator import AudioVideoGenerator
-from task_queue_manager import TaskQueueManager
+from tk.task_queue_manager import TaskQueueManager
 import tkinter as tk
 
 class App:

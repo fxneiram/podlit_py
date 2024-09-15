@@ -1,15 +1,15 @@
 import os
+import time
+
 from TTS.api import TTS
-from tqdm import tqdm
 import config as cfg
-import hvideo
-import haudio
+from mh.hvideo import VideoGenerator
+from mh.haudio import AudioCombiner
 import hfiles
-
-import warnings
-warnings.filterwarnings("ignore")
-
 import logging
+import warnings
+
+warnings.filterwarnings("ignore")
 logging.getLogger("moviepy").setLevel(logging.ERROR)
 
 
@@ -18,12 +18,14 @@ class AudioVideoGenerator:
         self.sample_voice = sample_voice
         self.device = device
         self.tts = TTS(model_path, progress_bar=False).to(self.device)
-    
+        self.audio_combiner = None
+        self.video_generator = VideoGenerator()
+
     def generate_files(self, text_to_speak, progress_callback=None):
         hfiles.create_work_folders()
-        
+
         output_audio_path, output_video_path = hfiles.get_final_file_names(text_to_speak[1]["text"])
-        
+
         audio_paths = []
         video_paths = []
 
@@ -38,7 +40,7 @@ class AudioVideoGenerator:
             video_path = os.path.join(cfg.TEMP_VIDEO_DIR, f"temp_{i}.mp4")
 
             self.tts.tts_to_file(text=text, speaker_wav=self.sample_voice, language=language, file_path=audio_path)
-            hvideo.generate_fragment(path_to_audio=audio_path, text=text, output_file=video_path)
+            self.video_generator.generate_fragment(path_to_audio=audio_path, text=text, output_file=video_path)
 
             audio_paths.append(audio_path)
             video_paths.append(video_path)
@@ -48,21 +50,18 @@ class AudioVideoGenerator:
                 progress_callback(progress, f"Processing fragment {i + 1}/{total_files}")
 
         progress_callback(100, "Combining audio fragments")
-        haudio.combine_audio_fragments(audio_paths, output_audio_path)
-        
+        self.audio_combiner = AudioCombiner(audio_paths, output_audio_path)
+        self.audio_combiner.combine_audio_fragments()
+
         progress_callback(100, "Combining video fragments")
-        hvideo.combine_video_fragments(video_paths, output_audio_path.replace('.wav', '.mp4'))
-        
+        self.video_generator.combine_video_fragments(video_paths, output_audio_path.replace('.wav', '.mp4'))
+
         progress_callback(100, "Done")
-        
+
         while True:
             try:
                 hfiles.clean_temp_folders()
                 time.sleep(10)
                 break
-            except:
-                print("Error cleaning temp folders, trying again in 10 seconds")
-
-
-
-
+            except Exception as e:
+                print(f"Error cleaning temp folders, trying again in 10 seconds: {e}")
