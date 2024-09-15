@@ -69,7 +69,7 @@ To generate multimedia content, follow these steps:
 
 1. Run next command
 ```shell
-python main.py
+python app.py
 ```
 2. Use the provided prompt and adjust it according to your needs.
 3. Paste the result of the prompt into the PodLitPy job queue.
