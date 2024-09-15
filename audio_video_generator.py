@@ -22,7 +22,7 @@ class AudioVideoGenerator:
         self.video_generator = VideoGenerator()
         self.file_manager = FileManager()
 
-    def generate_files(self, text_to_speak, progress_callback=None):
+    def generate_files(self, text_to_speak, progress_callback=None) -> (str, str):
         self.file_manager.create_work_folders()
 
         output_audio_path, output_video_path = self.file_manager.get_final_file_names(text_to_speak[1]["text"])
@@ -55,7 +55,7 @@ class AudioVideoGenerator:
         self.audio_combiner.combine_audio_fragments()
 
         progress_callback(100, "Combining video fragments")
-        self.video_generator.combine_video_fragments(video_paths, output_audio_path.replace('.wav', '.mp4'))
+        self.video_generator.combine_video_fragments(video_paths, output_video_path)
 
         progress_callback(100, "Done")
 
@@ -66,3 +66,5 @@ class AudioVideoGenerator:
                 break
             except Exception as e:
                 print(f"Error cleaning temp folders, trying again in 10 seconds: {e}")
+        
+        return output_audio_path, output_video_path
