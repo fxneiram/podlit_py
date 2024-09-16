@@ -42,21 +42,6 @@ class VideoGenerator:
         video_clip = image_clip.set_audio(audio_clip)
         video_clip.write_videofile(output_file, fps=self.fps)
 
-    def combine_video_fragments(self, fragments, output_path):
-        clips = []
-        delay_duration = self.duration_between_fragments / 1000.0
-
-        delay_clip = ColorClip(size=(self.width, self.height), color=self.background_color, duration=delay_duration)
-        clips.append(delay_clip)
-
-        for fragment in fragments:
-            video_clip = VideoFileClip(fragment)
-            clips.append(video_clip)
-            clips.append(delay_clip)
-
-        final_clip = concatenate_videoclips(clips, method="compose")
-        final_clip.write_videofile(output_path, fps=24)
-
     def wrap_text(self, text, font, max_width):
         lines = []
         words = text.split()
@@ -75,3 +60,19 @@ class VideoGenerator:
         if line:
             lines.append(line)
         return lines
+
+    def combine_video_fragments(self, fragments, output_path):
+        clips = []
+        delay_duration = self.duration_between_fragments / 1000.0
+
+        delay_clip = ColorClip(size=(self.width, self.height), color=self.background_color, duration=delay_duration)
+        clips.append(delay_clip)
+
+        for fragment in fragments:
+            video_clip = VideoFileClip(fragment)
+            clips.append(video_clip)
+            clips.append(delay_clip)
+
+        final_clip = concatenate_videoclips(clips, method="chain")
+        final_clip.write_videofile(output_path, fps=24)
+

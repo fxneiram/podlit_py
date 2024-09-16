@@ -25,8 +25,10 @@ class TaskQueueManager:
         self.root.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}")
 
         self.task_queue = []
-        self.task_delay = 5 * 60 * 1000  # 5 minutes
+        self.task_delay = 0 * 60 * 1000  # 0 minutes
         self.task_queue_index = 0
+
+        self.processed_tasks = []
 
         top_frame = tk.Frame(root)
         top_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
@@ -97,8 +99,14 @@ class TaskQueueManager:
         self.task_queue_index = 0
         self.process_next_task()
 
+
     def process_next_task(self):
         if self.task_queue_index >= len(self.task_queue):
+            print('Mix Queue:', self.mix_queue_var.get())
+            if self.mix_queue_var.get():
+                self.media_generator.combine_queue(self.processed_tasks)
+
+            self.processed_tasks.clear()
             self.task_queue.clear()
             self.tree.delete(*self.tree.get_children())
             self.update_queue_progress(100)
@@ -128,7 +136,9 @@ class TaskQueueManager:
     def process_single_task(self, task):
         self.task_progress['value'] = 0
         self.root.update_idletasks()
-        self.media_generator.generate_files(task, self.update_progress)
+        generated_audio, generated_video = self.media_generator.generate_files(task, self.update_progress)
+        self.processed_tasks.append((generated_audio, generated_video))
+
 
     def clear_tasks(self):
         self.task_queue.clear()
