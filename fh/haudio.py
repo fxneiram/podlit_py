@@ -3,21 +3,30 @@ from tqdm import tqdm
 from pkg import config as cfg
 
 
-class AudioCombiner:
-    def __init__(self, fragments, output_path, duration_between_fragments=None):
-        self.fragments = fragments
-        self.output_path = output_path
-        self.duration_between_fragments = duration_between_fragments or cfg.DURATION_BETWEEN_FRAGMENTS
+class AudioManager:
+    def __init__(self):
+        pass
 
-    def combine_audio_fragments(self):
-        silence = AudioSegment.silent(duration=self.duration_between_fragments)
+    def combine_audio_fragments(self, fragments, output_path):
+        silence = AudioSegment.silent(duration=cfg.DURATION_BETWEEN_FRAGMENTS)
         combined = silence
 
-        for file_path in tqdm(self.fragments, desc="Joining audio fragments.", unit="file"):
+        for file_path in fragments:
             segment = AudioSegment.from_wav(file_path)
             combined += segment + silence
 
-        combined += silence
+        combined.export(output_path, format="wav")
+        print(f"Combined audio exported to: {output_path}")
 
-        combined.export(self.output_path, format="wav")
-        print(f"Combined audio exported to: {self.output_path}")
+
+    def add_silence(self, audio_path, duration, before=True, after=True):
+        audio = AudioSegment.from_wav(audio_path)
+        silence = AudioSegment.silent(duration=duration)
+        
+        if before:
+            audio = silence + audio
+
+        if after:
+            audio = audio + silence
+
+        audio.export(audio_path, format="wav")

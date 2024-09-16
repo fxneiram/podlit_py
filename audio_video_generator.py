@@ -3,8 +3,8 @@ import time
 
 from TTS.api import TTS
 from pkg import config as cfg
-from fh.hvideo import VideoGenerator
-from fh.haudio import AudioCombiner
+from fh.hvideo import VideoManager
+from fh.haudio import AudioManager
 from fh.hfiles import FileManager
 import logging
 import warnings
@@ -18,11 +18,13 @@ class AudioVideoGenerator:
         self.sample_voice = sample_voice
         self.device = device
         self.tts = TTS(model_path, progress_bar=False).to(self.device)
-        self.audio_combiner = None
-        self.video_generator = VideoGenerator()
+        self.audio_manager = AudioManager()
+
+        self.video_generator = VideoManager(duration_between_fragments=0)
+
         self.file_manager = FileManager()
 
-    def generate_files(self, text_to_speak, progress_callback=None):
+    def generate_files(self, text_to_speak, progress_callback=None) -> (str, str):
         self.file_manager.create_work_folders()
 
         output_audio_path, output_video_path = self.file_manager.get_final_file_names(text_to_speak[1]["text"])
@@ -41,6 +43,8 @@ class AudioVideoGenerator:
             video_path = os.path.join(cfg.TEMP_VIDEO_DIR, f"temp_{i}.mp4")
 
             self.tts.tts_to_file(text=text, speaker_wav=self.sample_voice, language=language, file_path=audio_path)
+            self.audio_manager.add_silence(audio_path, 250, before=True, after=True)
+
             self.video_generator.generate_fragment(path_to_audio=audio_path, text=text, output_file=video_path)
 
             audio_paths.append(audio_path)
@@ -51,11 +55,11 @@ class AudioVideoGenerator:
                 progress_callback(progress, f"Processing fragment {i + 1}/{total_files}")
 
         progress_callback(100, "Combining audio fragments")
-        self.audio_combiner = AudioCombiner(audio_paths, output_audio_path)
-        self.audio_combiner.combine_audio_fragments()
+
+        self.audio_manager.combine_audio_fragments(audio_paths, output_audio_path)
 
         progress_callback(100, "Combining video fragments")
-        self.video_generator.combine_video_fragments(video_paths, output_audio_path.replace('.wav', '.mp4'))
+        self.video_generator.combine_video_fragments(video_paths, output_video_path)
 
         progress_callback(100, "Done")
 
@@ -66,3 +70,26 @@ class AudioVideoGenerator:
                 break
             except Exception as e:
                 print(f"Error cleaning temp folders, trying again in 10 seconds: {e}")
+        
+        return output_audio_path, output_video_path
+    
+    def combine_queue(self, tasks=None):
+        if tasks is None:
+            tasks = []
+
+        audio_paths = []
+        video_paths = []
+        
+        for task in tasks:
+            audio_path, video_path = task
+            audio_paths.append(audio_path)
+            video_paths.append(video_path)
+
+        filename = audio_paths[0].replace('.wav', '_mix_')
+        output_audio_path = f'{filename}.wav'
+        output_video_path = f'{filename}.mp4'
+
+        self.audio_manager.combine_audio_fragments(audio_paths, output_audio_path)
+        self.video_generator.combine_video_fragments(video_paths, output_video_path)
+
+            

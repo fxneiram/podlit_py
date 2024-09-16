@@ -25,22 +25,26 @@ class TaskQueueManager:
         self.root.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}")
 
         self.task_queue = []
-        self.task_delay = 5 * 60 * 1000  # 5 minutes
+        self.task_delay = 0 * 60 * 1000  # 0 minutes
         self.task_queue_index = 0
+
+        self.processed_tasks = []
 
         top_frame = tk.Frame(root)
         top_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
         top_frame.grid_columnconfigure(1, weight=1)
 
         tk.Label(top_frame, text="Voices:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
-
         self.voice_options = self.get_wav_files("sample_voices")
-
         self.voice_combobox = ttk.Combobox(top_frame, values=self.voice_options, state="readonly")
         self.voice_combobox.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
         if self.voice_options:
             self.voice_combobox.current(0)
+
+        self.mix_queue_var = tk.BooleanVar(value=True)
+        self.mix_queue_checkbox = tk.Checkbutton(top_frame, text="Mix Queue", variable=self.mix_queue_var)
+        self.mix_queue_checkbox.grid(row=0, column=2, padx=5, pady=5, sticky="w")
 
         frame = tk.Frame(root)
         frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
@@ -68,12 +72,14 @@ class TaskQueueManager:
 
         root.grid_rowconfigure(1, weight=1)
         root.grid_columnconfigure(0, weight=1)
-        frame.grid_rowconfigure(1, weight=0)
+
+        frame.grid_rowconfigure(0, weight=1)
         frame.grid_columnconfigure(0, weight=1)
-        button_frame.grid_rowconfigure(0, weight=0)
+
         button_frame.grid_columnconfigure(0, weight=1)
         button_frame.grid_columnconfigure(1, weight=1)
         button_frame.grid_columnconfigure(2, weight=1)
+
 
     def get_wav_files(self, folder_path):
         if not os.path.exists(folder_path):
@@ -93,8 +99,14 @@ class TaskQueueManager:
         self.task_queue_index = 0
         self.process_next_task()
 
+
     def process_next_task(self):
         if self.task_queue_index >= len(self.task_queue):
+            print('Mix Queue:', self.mix_queue_var.get())
+            if self.mix_queue_var.get():
+                self.media_generator.combine_queue(self.processed_tasks)
+
+            self.processed_tasks.clear()
             self.task_queue.clear()
             self.tree.delete(*self.tree.get_children())
             self.update_queue_progress(100)
@@ -124,7 +136,9 @@ class TaskQueueManager:
     def process_single_task(self, task):
         self.task_progress['value'] = 0
         self.root.update_idletasks()
-        self.media_generator.generate_files(task, self.update_progress)
+        generated_audio, generated_video = self.media_generator.generate_files(task, self.update_progress)
+        self.processed_tasks.append((generated_audio, generated_video))
+
 
     def clear_tasks(self):
         self.task_queue.clear()
