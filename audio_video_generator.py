@@ -3,7 +3,7 @@ import time
 
 from TTS.api import TTS
 from pkg import config as cfg
-from fh.hvideo import VideoGenerator
+from fh.hvideo import VideoManager
 from fh.haudio import AudioManager
 from fh.hfiles import FileManager
 import logging
@@ -20,7 +20,7 @@ class AudioVideoGenerator:
         self.tts = TTS(model_path, progress_bar=False).to(self.device)
         self.audio_manager = AudioManager()
 
-        self.video_generator = VideoGenerator(duration_between_fragments=0)
+        self.video_generator = VideoManager(duration_between_fragments=0)
 
         self.file_manager = FileManager()
 

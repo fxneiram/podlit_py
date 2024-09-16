@@ -4,7 +4,7 @@ import numpy as np
 from pkg import config as cfg
 
 
-class VideoGenerator:
+class VideoManager:
     def __init__(self, width=cfg.WIDTH, height=cfg.HEIGHT, font_size=cfg.FONT_SIZE,
                  background_color=cfg.BACKGROUND_COLOR, text_color=cfg.TEXT_COLOR,
                  fps=cfg.FPS, duration_between_fragments=cfg.DURATION_BETWEEN_FRAGMENTS):
