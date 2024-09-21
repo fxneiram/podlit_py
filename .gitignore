@@ -6,3 +6,5 @@
 /.idea
 # ignore al py cache files
 *.pyc
+*.pkf
+*.mp4
