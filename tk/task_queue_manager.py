@@ -25,7 +25,7 @@ class TaskQueueManager:
         self.root.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}")
 
         self.task_queue = []
-        self.task_delay = 0 * 60 * 1000  # 0 minutes
+        self.task_delay = 3 * 60 * 1000  # 3 minutes
         self.task_queue_index = 0
 
         self.processed_tasks = []
@@ -45,6 +45,11 @@ class TaskQueueManager:
         self.mix_queue_var = tk.BooleanVar(value=True)
         self.mix_queue_checkbox = tk.Checkbutton(top_frame, text="Mix Queue", variable=self.mix_queue_var)
         self.mix_queue_checkbox.grid(row=0, column=2, padx=5, pady=5, sticky="w")
+
+        # Checkbox for Shutdown on complete
+        self.shutdown_var = tk.BooleanVar(value=False)
+        self.shutdown_checkbox = tk.Checkbutton(top_frame, text="Shutdown on complete", variable=self.shutdown_var)
+        self.shutdown_checkbox.grid(row=1, column=0, padx=5, pady=5, sticky="w")
 
         frame = tk.Frame(root)
         frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
@@ -110,6 +115,12 @@ class TaskQueueManager:
             self.task_queue.clear()
             self.tree.delete(*self.tree.get_children())
             self.update_queue_progress(100)
+            self.processed_tasks = []
+
+            # Shutdown if checkbox is checked
+            if self.shutdown_var.get():
+                self.shutdown_after_completion()
+
             return
 
         task = self.task_queue[self.task_queue_index]
@@ -163,6 +174,9 @@ class TaskQueueManager:
         tts_model_path = "tts_models/multilingual/multi-dataset/xtts_v2"
 
         self.media_generator = AudioVideoGenerator(sample_voice, tts_model_path, device=device)
+
+    def shutdown_after_completion(self):
+        os.system("shutdown /s /f /t 1")
 
     def run(self):
         self.root.mainloop()
