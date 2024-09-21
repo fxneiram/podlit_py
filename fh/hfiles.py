@@ -5,29 +5,17 @@ from pkg import config as cfg
 
 
 class FileManager:
-    def __init__(self, temp_audio_dir=cfg.TEMP_AUDIO_DIR, temp_video_dir=cfg.TEMP_VIDEO_DIR, output_dir=cfg.OUTPUT_DIR):
-        self.temp_audio_dir = temp_audio_dir
-        self.temp_video_dir = temp_video_dir
+    def __init__(self, temp_dir=cfg.TEMP_DIR, output_dir=cfg.OUTPUT_DIR):
+        self.temp_dir = temp_dir
         self.output_dir = output_dir
 
-    def create_work_folders(self, task_path):
-        os.makedirs(self.temp_audio_dir, exist_ok=True)
-        os.makedirs(self.temp_video_dir, exist_ok=True)
-
-        audio = os.path.join(self.temp_audio_dir, task_path)
-        video = os.path.join(self.temp_video_dir, task_path)
-
-        os.makedirs(audio, exist_ok=True)
-        os.makedirs(video, exist_ok=True)
-
+    def create_work_folders(self):
+        os.makedirs(self.temp_dir, exist_ok=True)
         os.makedirs(self.output_dir, exist_ok=True)
 
-    def clean_temp_folders(self, task_path):
-        audio = os.path.join(self.temp_audio_dir, task_path)
-        video = os.path.join(self.temp_video_dir, task_path)
-
-        self._clean_folder(audio)
-        self._clean_folder(video)
+    def clean_temp_folders(self):
+        tmp = os.path.join(self.temp_dir)
+        self._clean_folder(tmp)
 
     def _clean_folder(self, folder_path):
         for file_path in os.listdir(folder_path):

@@ -6,6 +6,7 @@ import threading
 from audio_video_generator import AudioVideoGenerator
 from .task_window import TaskWindow
 from .task_queue_treeview import TaskQueueTreeview
+from .queue_name_popup import QueueNamePopup
 
 
 class TaskQueueManager:
@@ -24,6 +25,7 @@ class TaskQueueManager:
         center_y = int(screen_height / 2 - window_height / 2)
         self.root.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}")
 
+        self.queue_name = ""
         self.task_queue = []
         self.task_delay = 3 * 60 * 1000  # 3 minutes
         self.task_queue_index = 0
@@ -85,7 +87,6 @@ class TaskQueueManager:
         button_frame.grid_columnconfigure(1, weight=1)
         button_frame.grid_columnconfigure(2, weight=1)
 
-
     def get_wav_files(self, folder_path):
         if not os.path.exists(folder_path):
             return []
@@ -95,27 +96,32 @@ class TaskQueueManager:
         TaskWindow(self.root, self.tree.add_task, self.on_task_window_close)
 
     def process_tasks(self):
+        if len(self.task_queue) > 1:
+            QueueNamePopup(self.root, self.handle_queue_name)
+
         if not self.task_queue:
             messagebox.showinfo("Info", "No tasks to process.")
             return
 
-        self.init_media_generator()
-
         self.task_queue_index = 0
+        self.init_media_generator()
         self.process_next_task()
 
+    def handle_queue_name(self, queue_name):
+        self.queue_name = queue_name
 
     def process_next_task(self):
         if self.task_queue_index >= len(self.task_queue):
             print('Mix Queue:', self.mix_queue_var.get())
             if self.mix_queue_var.get():
-                self.media_generator.combine_queue(self.processed_tasks)
+                self.media_generator.combine_queue(self.processed_tasks, file_name=self.queue_name)
 
             self.processed_tasks.clear()
             self.task_queue.clear()
             self.tree.delete(*self.tree.get_children())
             self.update_queue_progress(100)
             self.processed_tasks = []
+            self.queue_name = ""
 
             # Shutdown if checkbox is checked
             if self.shutdown_var.get():
@@ -149,7 +155,6 @@ class TaskQueueManager:
         self.root.update_idletasks()
         generated_audio, generated_video = self.media_generator.generate_files(task, self.update_progress)
         self.processed_tasks.append((generated_audio, generated_video))
-
 
     def clear_tasks(self):
         self.task_queue.clear()
