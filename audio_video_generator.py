@@ -20,16 +20,12 @@ class AudioVideoGenerator:
         self.device = device
         self.tts = TTS(model_path, progress_bar=False).to(self.device)
         self.audio_manager = AudioManager()
-
         self.video_generator = VideoManager()
-
         self.file_manager = FileManager()
 
     def generate_files(self, text_to_speak, progress_callback=None) -> (str, str):
         task_path = self.file_manager.generate_random_path()
-
         self.file_manager.create_work_folders()
-
         output_audio_path, output_video_path = self.file_manager.get_final_file_names(text_to_speak[1]["text"])
 
         audio_paths = []
