@@ -38,8 +38,8 @@ class AudioVideoGenerator:
             if text[-1] == ".":
                 text = text[:-1]
 
-            audio_path = os.path.join(cfg.TEMP_DIR, f"{task_path}_tmp_{i}_ado_.wav")
-            video_path = os.path.join(cfg.TEMP_DIR, f"{task_path}_tmp_{i}_vdo.mp4")
+            audio_path = os.path.join(cfg.TEMP_DIR, f"{task_path}_tmp_{i}_a.wav")
+            video_path = os.path.join(cfg.TEMP_DIR, f"{task_path}_tmp_{i}_v.mp4")
 
             self.tts.tts_to_file(text=text, speaker_wav=self.sample_voice, language=language, file_path=audio_path)
             self.audio_manager.add_silence(audio_path, 250, fps=24, before=True, after=True)
@@ -63,7 +63,7 @@ class AudioVideoGenerator:
 
         while True:
             try:
-                ##self.file_manager.clean_temp_folders(task_path)
+                self.file_manager.clean_temp_folders()
                 time.sleep(10)
                 break
             except Exception as e:
@@ -85,6 +85,8 @@ class AudioVideoGenerator:
 
         if file_name == "":
             file_name = audio_paths[0].replace('.wav', '_mix_')
+        else:
+            file_name = os.path.join(cfg.OUTPUT_DIR, file_name)
 
         output_audio_path = f'{file_name}.wav'
         output_video_path = f'{file_name}.mp4'
