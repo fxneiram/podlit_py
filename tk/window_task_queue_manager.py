@@ -4,12 +4,12 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 import threading
 from audio_video_generator import AudioVideoGenerator
-from .task_window import TaskWindow
-from .task_queue_treeview import TaskQueueTreeview
-from .queue_name_popup import QueueNamePopup
+from .add_task_window import AddTaskWindow
+from .treeview_task_queue import TreeviewTaskQueue
+from .set_queue_name_popup import SetQueueNamePopup
 
 
-class TaskQueueManager:
+class WindowTaskQueueManager:
     def __init__(self, root):
         self.media_generator = None
         self.root = root
@@ -56,7 +56,7 @@ class TaskQueueManager:
         frame = tk.Frame(root)
         frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
 
-        self.tree = TaskQueueTreeview(frame, self.task_queue, height=8)
+        self.tree = TreeviewTaskQueue(frame, self.task_queue, height=8)
         self.tree.grid(row=0, column=0, sticky="nsew")
 
         self.task_progress = ttk.Progressbar(frame, length=400, mode='determinate')
@@ -93,11 +93,11 @@ class TaskQueueManager:
         return [f for f in os.listdir(folder_path) if f.endswith(".wav")]
 
     def show_task_window(self):
-        TaskWindow(self.root, self.tree.add_task, self.on_task_window_close)
+        AddTaskWindow(self.root, self.tree.add_task, self.on_task_window_close)
 
     def process_tasks(self):
         if len(self.task_queue) > 1:
-            QueueNamePopup(self.root, self.handle_queue_name)
+            SetQueueNamePopup(self.root, self.handle_queue_name)
 
         if not self.task_queue:
             messagebox.showinfo("Info", "No tasks to process.")

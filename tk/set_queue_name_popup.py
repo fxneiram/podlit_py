@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 
-class QueueNamePopup:
+class SetQueueNamePopup:
     def __init__(self, parent, callback):
         self.top = tk.Toplevel(parent)
         self.top.title("Queue Name")
