@@ -1,8 +1,7 @@
 import os
 
 # FOLDER PATHS
-TEMP_AUDIO_DIR = os.getcwd() + '/temp_audio_files'
-TEMP_VIDEO_DIR = os.getcwd() + '/temp_video_files'
+TEMP_DIR = os.getcwd() + '/tmp'
 OUTPUT_DIR = os.getcwd() + '/output'
 
 # COLORS

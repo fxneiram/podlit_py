@@ -28,7 +28,7 @@ class AudioVideoGenerator:
     def generate_files(self, text_to_speak, progress_callback=None) -> (str, str):
         task_path = self.file_manager.generate_random_path()
 
-        self.file_manager.create_work_folders(task_path)
+        self.file_manager.create_work_folders()
 
         output_audio_path, output_video_path = self.file_manager.get_final_file_names(text_to_speak[1]["text"])
 
@@ -42,8 +42,8 @@ class AudioVideoGenerator:
             if text[-1] == ".":
                 text = text[:-1]
 
-            audio_path = os.path.join(cfg.TEMP_AUDIO_DIR, task_path, f"temp_{i}.wav")
-            video_path = os.path.join(cfg.TEMP_VIDEO_DIR, task_path, f"temp_{i}.mp4")
+            audio_path = os.path.join(cfg.TEMP_DIR, f"{task_path}_tmp_{i}_ado_.wav")
+            video_path = os.path.join(cfg.TEMP_DIR, f"{task_path}_tmp_{i}_vdo.mp4")
 
             self.tts.tts_to_file(text=text, speaker_wav=self.sample_voice, language=language, file_path=audio_path)
             self.audio_manager.add_silence(audio_path, 250, fps=24, before=True, after=True)
@@ -58,7 +58,6 @@ class AudioVideoGenerator:
                 progress_callback(progress, f"Processing fragment {i + 1}/{total_files}")
 
         progress_callback(100, "Combining audio fragments")
-
         self.audio_manager.combine_audio_fragments(audio_paths, output_audio_path)
 
         progress_callback(100, "Combining video fragments")
@@ -76,7 +75,7 @@ class AudioVideoGenerator:
         
         return output_audio_path, output_video_path
     
-    def combine_queue(self, tasks=None):
+    def combine_queue(self, tasks=None, file_name=""):
         if tasks is None:
             tasks = []
 
@@ -88,9 +87,11 @@ class AudioVideoGenerator:
             audio_paths.append(audio_path)
             video_paths.append(video_path)
 
-        filename = audio_paths[0].replace('.wav', '_mix_')
-        output_audio_path = f'{filename}.wav'
-        output_video_path = f'{filename}.mp4'
+        if file_name == "":
+            file_name = audio_paths[0].replace('.wav', '_mix_')
+
+        output_audio_path = f'{file_name}.wav'
+        output_video_path = f'{file_name}.mp4'
 
         self.audio_manager.combine_audio_fragments(audio_paths, output_audio_path)
         self.video_generator.combine_video_fragments(video_paths, output_video_path)
