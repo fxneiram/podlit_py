@@ -1,11 +1,10 @@
 import os
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import messagebox, ttk, filedialog
 import threading
 from audio_video_generator import AudioVideoGenerator
 from .add_task_window import AddTaskWindow
 from .treeview_task_queue import TreeviewTaskQueue
-from .set_queue_name_popup import SetQueueNamePopup
 
 
 class WindowTaskQueueManager:
@@ -82,7 +81,14 @@ class WindowTaskQueueManager:
 
     def btn_action_process_tasks(self):
         if len(self.task_queue) > 1:
-            SetQueueNamePopup(self.root, self.callback_handle_queue_name)
+            self.queue_name = filedialog.asksaveasfilename(
+                defaultextension=".mp4",
+                filetypes=[("Mp4 Files", "*.mp4")],
+                title="Save queue as..."
+            )
+
+            if self.queue_name == "":
+                return
 
         if not self.task_queue:
             messagebox.showinfo("Info", "No tasks to process.")
@@ -96,9 +102,6 @@ class WindowTaskQueueManager:
         self.task_queue.clear()
         self.tree.delete(*self.tree.get_children())
         self.update_queue_progress(0)
-
-    def callback_handle_queue_name(self, queue_name):
-        self.queue_name = queue_name
 
     def callback_update_progress(self, progress, status="Processing"):
         # Task Progres
@@ -159,10 +162,6 @@ class WindowTaskQueueManager:
             progress = (self.task_queue_index + current_task_progress / 100) / len(self.task_queue) * 100
         else:
             progress = 0
-
-        print(f"Current Task Progress: {current_task_progress}%")
-        print(f"Current Task Index: {self.task_queue_index}")
-        print(f"Queue Progress: {progress}%")
 
         self.queue_progress['value'] = progress
         self.root.title("Pod Lit Py " + str(progress) + "%")

@@ -102,12 +102,11 @@ class AudioVideoGenerator:
             video_paths.append(video_path)
 
         if file_name == "":
-            file_name = audio_paths[0].replace('.wav', '_mix_')
+            output_audio_path = audio_paths[0].replace('.wav', '_mix_')
+            output_video_path = output_audio_path.replace('.wav', '.mp4')
         else:
-            file_name = os.path.join(cfg.OUTPUT_DIR, file_name)
-
-        output_audio_path = f'{file_name}.wav'
-        output_video_path = f'{file_name}.mp4'
+            output_audio_path = file_name.replace('.mp4', '.wav')
+            output_video_path = file_name
 
         self.audio_manager.combine_audio_fragments(audio_paths, output_audio_path)
         self.video_generator.combine_video_fragments(video_paths, output_video_path)
