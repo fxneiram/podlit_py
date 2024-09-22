@@ -2,14 +2,15 @@ import tkinter as tk
 from tkinter import scrolledtext, messagebox
 import ast
 
-class TaskWindow:
+
+class AddTaskWindow:
     def __init__(self, root, callback, on_close):
         self.callback = callback
         self.on_close = on_close
         self.floating_window = tk.Toplevel(root)
         self.floating_window.title("Enter your task text")
         self.floating_window.geometry(f"{self.floating_window.winfo_screenwidth()}x400")
-        
+
         self.create_widgets()
 
     def create_widgets(self):

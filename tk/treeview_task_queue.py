@@ -2,7 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
-class TaskQueueTreeview(ttk.Treeview):
+
+class TreeviewTaskQueue(ttk.Treeview):
     def __init__(self, parent, task_queue, *args, **kwargs):
         super().__init__(parent, columns=("Task", "Progress", "Status"), show="headings", *args, **kwargs)
         self.heading("Task", text="Task Queue")
@@ -18,8 +19,6 @@ class TaskQueueTreeview(ttk.Treeview):
 
         self.task_queue = task_queue
 
-
-
     def add_task(self, task):
         if 1 in task and "text" in task[1]:
             display_text = task[1]["text"]
@@ -29,7 +28,6 @@ class TaskQueueTreeview(ttk.Treeview):
         self.task_queue.append(task)
         self.insert("", "end", values=(display_text, "0%", "Pending"))
 
-    
     def delete_selected_task(self):
         selected_items = self.selection()
         if not selected_items:
@@ -49,10 +47,8 @@ class TaskQueueTreeview(ttk.Treeview):
             if task_to_delete:
                 self.task_queue.remove(task_to_delete)
 
-
     def show_context_menu(self, event):
         self.menu.post(event.x_root, event.y_root)
-
 
     def update_progress_and_status(self, progress, status, index):
         task_id = self.get_children()[index]
