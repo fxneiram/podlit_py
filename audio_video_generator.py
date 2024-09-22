@@ -7,6 +7,8 @@ from fh.hvideo import VideoManager
 from fh.haudio import AudioManager
 from fh.hfiles import FileManager
 
+import torch
+
 import logging
 import warnings
 
@@ -15,10 +17,15 @@ logging.getLogger("moviepy").setLevel(logging.ERROR)
 
 
 class AudioVideoGenerator:
-    def __init__(self, sample_voice, model_path, device="cpu"):
-        self.sample_voice = sample_voice
-        self.device = device
-        self.tts = TTS(model_path, progress_bar=False).to(self.device)
+    def __init__(self, selected_voice=None):
+        self.selected_voice = selected_voice
+        self.available_voices = []
+        self.load_voices()
+
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        model_path = "tts_models/multilingual/multi-dataset/xtts_v2"
+        self.tts = TTS(model_path, progress_bar=False).to(device)
+
         self.audio_manager = AudioManager()
         self.video_generator = VideoManager()
         self.file_manager = FileManager()
@@ -41,7 +48,7 @@ class AudioVideoGenerator:
             audio_path = os.path.join(cfg.TEMP_DIR, f"{task_path}_tmp_{i}_a.wav")
             video_path = os.path.join(cfg.TEMP_DIR, f"{task_path}_tmp_{i}_v.mp4")
 
-            self.tts.tts_to_file(text=text, speaker_wav=self.sample_voice, language=language, file_path=audio_path)
+            self.tts.tts_to_file(text=text, speaker_wav=self.selected_voice, language=language, file_path=audio_path)
             self.audio_manager.add_silence(audio_path, 250, fps=24, before=True, after=True)
 
             self.video_generator.generate_fragment(path_to_audio=audio_path, text=text, output_file=video_path)
@@ -71,6 +78,17 @@ class AudioVideoGenerator:
         
         return output_audio_path, output_video_path
     
+    def load_voices(self):
+        self.available_voices = []
+        for file in os.listdir("sample_voices"):
+            if file.endswith(".wav"):
+                self.available_voices.append(file)
+
+        return self.available_voices
+
+    def change_voice(self, voice):
+        self.selected_voice = f"sample_voices/{voice}"
+
     def combine_queue(self, tasks=None, file_name=""):
         if tasks is None:
             tasks = []
