@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk, filedialog
 import threading
 from audio_video_generator import AudioVideoGenerator
+from models.task import Task
 from .add_task_window import AddTaskWindow
 from .treeview_task_queue import TreeviewTaskQueue
 
@@ -16,7 +17,7 @@ class WindowTaskQueueManager:
 
         self.queue_name = ""
         self.task_queue = []
-        self.task_delay = 3 * 60 * 1000  # 3 minutes
+        self.task_delay = 0 * 60 * 1000  # 3 minutes
         self.task_queue_index = 0
 
         self.processed_tasks = []
@@ -60,11 +61,15 @@ class WindowTaskQueueManager:
         self.add_task_button = tk.Button(button_frame, text="Add Task", command=self.btn_action_show_task_window)
         self.add_task_button.grid(row=0, column=0, padx=5, pady=5)
 
+        # New button for adding from file
+        self.add_from_file_button = tk.Button(button_frame, text="Add From File", command=self.btn_action_add_from_file)
+        self.add_from_file_button.grid(row=0, column=1, padx=5, pady=5)
+
         self.process_tasks_button = tk.Button(button_frame, text="Process Queue", command=self.btn_action_process_tasks)
-        self.process_tasks_button.grid(row=0, column=1, padx=5, pady=5)
+        self.process_tasks_button.grid(row=0, column=2, padx=5, pady=5)
 
         self.clear_tasks_button = tk.Button(button_frame, text="Clean Queue", command=self.btn_action_clear_tasks)
-        self.clear_tasks_button.grid(row=0, column=2, padx=5, pady=5)
+        self.clear_tasks_button.grid(row=0, column=3, padx=5, pady=5)
 
         root.grid_rowconfigure(1, weight=1)
         root.grid_columnconfigure(0, weight=1)
@@ -75,6 +80,21 @@ class WindowTaskQueueManager:
         button_frame.grid_columnconfigure(0, weight=1)
         button_frame.grid_columnconfigure(1, weight=1)
         button_frame.grid_columnconfigure(2, weight=1)
+
+    def btn_action_add_from_file(self):
+        file_path = filedialog.askopenfilename(
+            title="Select a file",
+            filetypes=[("Text files", "*.txt"), ("JSON files", "*.json")]
+        )
+        if file_path:
+            try:
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    file_content = file.read()
+                    file_content = Task.validate_input(file_content)
+                    self.tree.add_task(file_content)
+            except Exception as e:
+                messagebox.showerror("Error", f"Error while reading file: {e}")
+
 
     def btn_action_show_task_window(self):
         AddTaskWindow(self.root, self.tree.add_task, self.on_task_window_close)
