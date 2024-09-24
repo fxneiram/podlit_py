@@ -64,7 +64,7 @@ class AudioVideoGenerator:
         self.audio_manager.combine_audio_fragments(audio_paths, output_audio_path)
 
         progress_callback(100, "Combining video fragments")
-        self.video_generator.combine_video_fragments(video_paths, output_video_path)
+        self.video_generator.combine_video_fragments_ffmpeg(video_paths, output_video_path)
 
         progress_callback(100, "Done")
 
@@ -90,8 +90,8 @@ class AudioVideoGenerator:
         self.selected_voice = f"sample_voices/{voice}"
 
     def combine_queue(self, tasks=None, file_name=""):
-        if tasks is None:
-            tasks = []
+        if len(tasks) < 1:
+            return
 
         audio_paths = []
         video_paths = []
@@ -102,11 +102,11 @@ class AudioVideoGenerator:
             video_paths.append(video_path)
 
         if file_name == "":
-            output_audio_path = audio_paths[0].replace('.wav', '_mix_')
+            output_audio_path = audio_paths[0].replace('.wav', '_mix_.wav')
             output_video_path = output_audio_path.replace('.wav', '.mp4')
         else:
             output_audio_path = file_name.replace('.mp4', '.wav')
             output_video_path = file_name
 
         self.audio_manager.combine_audio_fragments(audio_paths, output_audio_path)
-        self.video_generator.combine_video_fragments(video_paths, output_video_path)
+        self.video_generator.combine_video_fragments_ffmpeg(video_paths, output_video_path)

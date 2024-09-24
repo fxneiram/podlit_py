@@ -101,3 +101,24 @@ class VideoManager:
 
         os.system(f"ffmpeg -i {fragment_tmp} -i {audio_file} -c:v copy -c:a aac -strict experimental {output_path}")
         os.remove(fragment_tmp)
+
+    def combine_video_fragments_ffmpeg(self, fragments, output_path):
+        with open("fragments.txt", "w", encoding="utf-8") as file:
+            for fragment in fragments:
+                file.write(f"file '{fragment}'\n")
+
+        output_path_quoted = f'"{output_path}"'
+
+        print(f"Video to generate: {output_path}")
+        ffmpeg_command = f'ffmpeg -y -f concat -safe 0 -segment_time_metadata 1 -i fragments.txt -vf select=concatdec_select -af aselect=concatdec_select,aresample=async=1 {output_path_quoted}'
+
+        result = os.system(ffmpeg_command)
+
+        if result == 0:
+            print(f"Video successfully created at: {output_path}")
+        else:
+            print("Error occurred while combining video fragments")
+
+        os.remove("fragments.txt")
+
+
