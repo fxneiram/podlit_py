@@ -30,6 +30,15 @@ class AudioVideoGenerator:
         self.video_generator = VideoManager()
         self.file_manager = FileManager()
 
+    def _prepare_text(self, text):
+        # Remove trailing dots
+        text = text.endswith(".") and text[:-1] or text
+
+        # Remove quotes and double quotes
+        text = text.replace('"', "")
+        text = text.replace("'", "")
+        return text
+    
     def generate_files(self, text_to_speak, progress_callback=None) -> (str, str):
         start_time = time.time()
 
@@ -44,8 +53,7 @@ class AudioVideoGenerator:
         for i, (key, entry) in enumerate(text_to_speak.items()):
             language = entry["language"]
             text = entry["text"]
-            if text[-1] == ".":
-                text = text[:-1]
+            text = self._prepare_text(text)
 
             audio_path = os.path.join(cfg.TEMP_DIR, f"{task_path}_tmp_{i}_a.wav")
             video_path = os.path.join(cfg.TEMP_DIR, f"{task_path}_tmp_{i}_v.mp4")
