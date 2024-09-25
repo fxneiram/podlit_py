@@ -191,8 +191,8 @@ class WindowTaskQueueManager:
         else:
             progress = 0
 
-        self.queue_progress['value'] = progress
-        self.root.title("Pod Lit Py " + str(progress) + "%")
+        self.queue_progress['value'] = round(progress, 2)
+        self.root.title("Pod Lit Py " + str(round(progress, 2)) + "%")
 
     def on_task_window_close(self):
         pass
