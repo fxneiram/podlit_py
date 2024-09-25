@@ -31,6 +31,8 @@ class AudioVideoGenerator:
         self.file_manager = FileManager()
 
     def generate_files(self, text_to_speak, progress_callback=None) -> (str, str):
+        start_time = time.time()
+
         task_path = self.file_manager.generate_random_path()
         self.file_manager.create_work_folders()
         output_audio_path, output_video_path = self.file_manager.get_final_file_names(text_to_speak[1]["text"])
@@ -66,7 +68,10 @@ class AudioVideoGenerator:
         progress_callback(100, "Combining video fragments")
         self.video_generator.combine_video_fragments_ffmpeg(video_paths, output_video_path)
 
-        progress_callback(100, "Done")
+        elapsed_time = time.time() - start_time
+        minutes, seconds = divmod(elapsed_time, 60)
+
+        progress_callback(100, f"Done Elapsed {int(minutes)} minutes: {int(seconds)} seconds")
 
         while True:
             try:
