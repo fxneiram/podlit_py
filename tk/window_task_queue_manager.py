@@ -17,7 +17,7 @@ class WindowTaskQueueManager:
 
         self.queue_name = ""
         self.task_queue = []
-        self.task_delay = 0 * 60 * 1000  # 3 minutes
+        self.task_delay = 1 * 60 * 1000
         self.task_queue_index = 0
 
         self.processed_tasks = []
@@ -38,10 +38,14 @@ class WindowTaskQueueManager:
         self.mix_queue_checkbox = tk.Checkbutton(top_frame, text="Mix Queue", variable=self.mix_queue_var)
         self.mix_queue_checkbox.grid(row=0, column=2, padx=5, pady=5, sticky="w")
 
-        # Checkbox for Shutdown on complete
         self.shutdown_var = tk.BooleanVar(value=False)
         self.shutdown_checkbox = tk.Checkbutton(top_frame, text="Shutdown on complete", variable=self.shutdown_var)
-        self.shutdown_checkbox.grid(row=1, column=0, padx=5, pady=5, sticky="w")
+        self.shutdown_checkbox.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
+
+        # Slider for task delay (in minutes)
+        tk.Label(top_frame, text="Task Delay (minutes):").grid(row=0, column=4, padx=5, pady=5, sticky="ew")
+        self.delay_slider = tk.Scale(top_frame, from_=0, to=5, orient=tk.HORIZONTAL, length=200, command=self.update_task_delay)
+        self.delay_slider.grid(row=0, column=5, padx=5, pady=0, sticky="ew")
 
         frame = tk.Frame(root)
         frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
@@ -80,6 +84,10 @@ class WindowTaskQueueManager:
         button_frame.grid_columnconfigure(0, weight=1)
         button_frame.grid_columnconfigure(1, weight=1)
         button_frame.grid_columnconfigure(2, weight=1)
+
+    def update_task_delay(self, value):
+        minutes = int(value)
+        self.task_delay = minutes * 60 * 1000
 
     def btn_action_add_from_file(self):
         file_path = filedialog.askopenfilename(
