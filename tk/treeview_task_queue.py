@@ -1,17 +1,36 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter import messagebox, simpledialog
+from tkinter import messagebox, simpledialog, scrolledtext
 
 
 class TreeviewTaskQueue(ttk.Treeview):
     def __init__(self, parent, task_queue, *args, **kwargs):
-        super().__init__(parent, columns=("Task", "Progress", "Status"), show="headings", *args, **kwargs)
+        # Crear el contenedor dentro del parent
+        self.container = tk.Frame(parent)
+        self.container.grid(row=0, column=0, sticky="nsew")
+
+        # Crear el widget ScrolledText (cuadro de texto con scroll) en la columna 0
+        self.text_box = scrolledtext.ScrolledText(self.container, wrap=tk.WORD)
+        self.text_box.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
+
+        # Configurar el Treeview
+        super().__init__(self.container, columns=("Task", "Progress", "Status"), show="headings", *args, **kwargs)
         self.heading("Task", text="Task Queue")
         self.heading("Progress", text="Progress")
         self.heading("Status", text="Status")
         self.column("Progress", width=40)
         self.column("Status", width=100)
-        self.grid(row=0, column=0, sticky="nsew")
+
+        # Colocar el Treeview en la columna 1 del contenedor
+        self.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+
+        # Configurar el layout del contenedor para que se expandan los widgets
+        self.container.grid_columnconfigure(0, weight=1)  # Para ScrolledText
+        self.container.grid_columnconfigure(1, weight=1)  # Para Treeview
+        self.container.grid_rowconfigure(0, weight=1)  # Fila única para ambos widgets
+
+        # Enlace a la lista de tareas
+        self.task_queue = task_queue
 
         # Menú contextual
         self.menu = tk.Menu(self, tearoff=0)
@@ -19,7 +38,18 @@ class TreeviewTaskQueue(ttk.Treeview):
         self.menu.add_command(label="Delete", command=self.delete_selected_task)
         self.bind("<Button-3>", self.show_context_menu)
 
-        self.task_queue = task_queue
+        # Evento para seleccionar una fila y cargar el nombre en el cuadro de texto
+        self.bind("<<TreeviewSelect>>", self.load_selected_task_name)
+
+    def load_selected_task_name(self, event):
+        selected_items = self.selection()
+        if not selected_items:
+            return
+
+        item = selected_items[0]
+        current_task_name = self.item(item, 'values')[0]
+        self.text_box.delete("1.0", tk.END)
+        self.text_box.insert(tk.END, current_task_name)
 
     def add_task(self, task):
         if 1 in task and "text" in task[1]:
