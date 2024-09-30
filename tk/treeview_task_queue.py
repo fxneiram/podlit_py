@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter import messagebox
+from tkinter import messagebox, simpledialog
 
 
 class TreeviewTaskQueue(ttk.Treeview):
@@ -13,7 +13,9 @@ class TreeviewTaskQueue(ttk.Treeview):
         self.column("Status", width=100)
         self.grid(row=0, column=0, sticky="nsew")
 
+        # Menú contextual
         self.menu = tk.Menu(self, tearoff=0)
+        self.menu.add_command(label="Edit Name", command=self.edit_selected_task_name)
         self.menu.add_command(label="Delete", command=self.delete_selected_task)
         self.bind("<Button-3>", self.show_context_menu)
 
@@ -46,6 +48,25 @@ class TreeviewTaskQueue(ttk.Treeview):
 
             if task_to_delete:
                 self.task_queue.remove(task_to_delete)
+
+    def edit_selected_task_name(self):
+        selected_items = self.selection()
+        if not selected_items:
+            messagebox.showinfo("Info", "No task selected.")
+            return
+
+        item = selected_items[0]
+        current_task_name = self.item(item, 'values')[0]
+
+        new_task_name = simpledialog.askstring("Edit Task", "Enter new task name:", initialvalue=current_task_name)
+
+        if new_task_name:
+            self.set(item, column="Task", value=new_task_name)
+
+            for task in self.task_queue:
+                if task[1]["text"] == current_task_name:
+                    task[1]["text"] = new_task_name
+                    break
 
     def show_context_menu(self, event):
         self.menu.post(event.x_root, event.y_root)
