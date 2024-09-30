@@ -1,3 +1,4 @@
+import json
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox, simpledialog, scrolledtext
@@ -50,7 +51,11 @@ class TreeviewTaskQueue(ttk.Treeview):
         index = self.index(item)
 
         self.text_box.delete("1.0", tk.END)
-        self.text_box.insert(tk.END, self.task_queue[index])
+
+        task_data = self.task_queue[index]
+        formatted_json = json.dumps(task_data, indent=4)
+
+        self.text_box.insert(tk.END, formatted_json)
 
     def add_task(self, task):
         if 1 in task and "text" in task[1]:
