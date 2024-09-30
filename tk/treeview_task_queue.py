@@ -39,17 +39,18 @@ class TreeviewTaskQueue(ttk.Treeview):
         self.bind("<Button-3>", self.show_context_menu)
 
         # Evento para seleccionar una fila y cargar el nombre en el cuadro de texto
-        self.bind("<<TreeviewSelect>>", self.load_selected_task_name)
+        self.bind("<<TreeviewSelect>>", self.load_selected_task)
 
-    def load_selected_task_name(self, event):
+    def load_selected_task(self, event):
         selected_items = self.selection()
         if not selected_items:
             return
 
         item = selected_items[0]
-        current_task_name = self.item(item, 'values')[0]
+        index = self.index(item)
+
         self.text_box.delete("1.0", tk.END)
-        self.text_box.insert(tk.END, current_task_name)
+        self.text_box.insert(tk.END, self.task_queue[index])
 
     def add_task(self, task):
         if 1 in task and "text" in task[1]:
