@@ -147,11 +147,11 @@ class WindowTaskQueueManager:
             if self.mix_queue_var.get():
                 self.media_generator.combine_queue(self.processed_tasks, file_name=self.queue_name)
 
-            self.processed_tasks.clear()
-            self.task_queue.clear()
-            self.tree.delete(*self.tree.get_children())
+            #self.processed_tasks.clear()
+            #self.task_queue.clear()
+            #self.tree.delete(*self.tree.get_children())
             self.update_queue_progress(100)
-            self.processed_tasks = []
+            #self.processed_tasks = []
             self.queue_name = ""
 
             # Shutdown if checkbox is checked
