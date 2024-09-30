@@ -67,7 +67,7 @@ class WindowTaskQueueManager:
         self.add_task_button = tk.Button(button_frame, text="Save Queue", command=self.btn_action_save_queue)
         self.add_task_button.grid(row=0, column=0, padx=5, pady=5)
 
-        self.add_task_button = tk.Button(button_frame, text="Load Queue", command=self.btn_action_show_task_window)
+        self.add_task_button = tk.Button(button_frame, text="Load Queue", command=self.btn_action_load_queue)
         self.add_task_button.grid(row=0, column=1, padx=5, pady=5)
 
         self.add_task_button = tk.Button(button_frame, text="Add Task", command=self.btn_action_show_task_window)
@@ -110,6 +110,17 @@ class WindowTaskQueueManager:
             with open(file_path, 'wb') as archivo:
                 pickle.dump(self.task_queue, archivo)
             messagebox.showinfo("Success", f"File saved successfully!\nLocation: {file_path}")
+
+    def btn_action_load_queue(self):
+        file_path = filedialog.askopenfilename(
+            title="Select a file",
+            filetypes=[("Queue files", "*.que")]
+        )
+        if file_path:
+            with open(file_path, 'rb') as archivo:
+                tasks = pickle.load(archivo)
+            for task in tasks:
+                self.tree.add_task(task)
 
     def btn_action_add_from_file(self):
         file_path = filedialog.askopenfilename(
