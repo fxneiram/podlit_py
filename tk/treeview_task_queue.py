@@ -53,7 +53,7 @@ class TreeviewTaskQueue(ttk.Treeview):
         self.text_box.delete("1.0", tk.END)
 
         task_data = self.task_queue[index]
-        formatted_json = json.dumps(task_data, indent=4)
+        formatted_json = json.dumps(task_data, indent=4, ensure_ascii=False)
 
         self.text_box.insert(tk.END, formatted_json)
 
