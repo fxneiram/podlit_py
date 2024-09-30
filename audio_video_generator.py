@@ -33,12 +33,8 @@ class AudioVideoGenerator:
     def _prepare_text(self, text):
         # Remove trailing dots
         text = text.endswith(".") and text[:-1] or text
-
-        # Remove quotes and double quotes
-        text = text.replace('"', "")
-        text = text.replace("'", "")
         return text
-    
+
     def generate_files(self, text_to_speak, progress_callback=None) -> (str, str):
         start_time = time.time()
 
