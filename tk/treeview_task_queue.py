@@ -46,7 +46,6 @@ class TreeviewTaskQueue(ttk.Treeview):
 
         # Menú contextual
         self.menu = tk.Menu(self, tearoff=0)
-        self.menu.add_command(label="Edit Name", command=self.edit_selected_task_name)
         self.menu.add_command(label="Delete", command=self.delete_selected_task)
         self.bind("<Button-3>", self.show_context_menu)
 
@@ -67,6 +66,7 @@ class TreeviewTaskQueue(ttk.Treeview):
             task_data = json.loads(task_data)
             self.task_queue[index] = task_data
             messagebox.showinfo("Info", "Task updated successfully.")
+            self.edit_selected_task_name(task_data['1']['text'])
         except json.JSONDecodeError:
             messagebox.showerror("Error", "Invalid JSON data.")
 
@@ -137,7 +137,7 @@ class TreeviewTaskQueue(ttk.Treeview):
             if task_to_delete:
                 self.task_queue.remove(task_to_delete)
 
-    def edit_selected_task_name(self):
+    def edit_selected_task_name(self, new_name=""):
         selected_items = self.selection()
         if not selected_items:
             messagebox.showinfo("Info", "No task selected.")
@@ -146,14 +146,12 @@ class TreeviewTaskQueue(ttk.Treeview):
         item = selected_items[0]
         current_task_name = self.item(item, 'values')[0]
 
-        new_task_name = simpledialog.askstring("Edit Task", "Enter new task name:", initialvalue=current_task_name)
-
-        if new_task_name:
-            self.set(item, column="Task", value=new_task_name)
+        if new_name:
+            self.set(item, column="Task", value=new_name)
 
             for task in self.task_queue:
-                if task[1]["text"] == current_task_name:
-                    task[1]["text"] = new_task_name
+                if task["1"]["text"] == current_task_name:
+                    task["1"]["text"] = new_name
                     break
 
     def show_context_menu(self, event):
