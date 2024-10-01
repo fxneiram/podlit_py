@@ -5,7 +5,6 @@ from tkinter import messagebox, ttk, filedialog
 import threading
 from audio_video_generator import AudioVideoGenerator
 from models.task import Task
-from .add_task_window import AddTaskWindow
 from .treeview_task_queue import TreeviewTaskQueue
 
 
@@ -45,7 +44,8 @@ class WindowTaskQueueManager:
 
         # Slider for task delay (in minutes)
         tk.Label(top_frame, text="Task Delay (minutes):").grid(row=0, column=4, padx=5, pady=5, sticky="ew")
-        self.delay_slider = tk.Scale(top_frame, from_=0, to=5, orient=tk.HORIZONTAL, length=200, command=self.update_task_delay)
+        self.delay_slider = tk.Scale(top_frame, from_=0, to=5, orient=tk.HORIZONTAL, length=200,
+                                     command=self.update_task_delay)
         self.delay_slider.grid(row=0, column=5, padx=5, pady=0, sticky="ew")
 
         frame = tk.Frame(root)
@@ -136,9 +136,11 @@ class WindowTaskQueueManager:
             except Exception as e:
                 messagebox.showerror("Error", f"Error while reading file: {e}")
 
-
     def btn_action_show_task_window(self):
-        AddTaskWindow(self.root, self.tree.add_task, self.on_task_window_close)
+        self.tree.add_task({1: {"text": "Empty Task", "language": "en"}})
+
+        # Select last item on the tree
+        self.tree.selection_set(self.tree.get_children()[-1])
 
     def btn_action_process_tasks(self):
         if len(self.task_queue) > 1:
@@ -180,11 +182,11 @@ class WindowTaskQueueManager:
             if self.mix_queue_var.get():
                 self.media_generator.combine_queue(self.processed_tasks, file_name=self.queue_name)
 
-            #self.processed_tasks.clear()
-            #self.task_queue.clear()
-            #self.tree.delete(*self.tree.get_children())
+            # self.processed_tasks.clear()
+            # self.task_queue.clear()
+            # self.tree.delete(*self.tree.get_children())
             self.update_queue_progress(100)
-            #self.processed_tasks = []
+            # self.processed_tasks = []
             self.queue_name = ""
 
             # Shutdown if checkbox is checked
