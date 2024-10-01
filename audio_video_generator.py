@@ -40,7 +40,7 @@ class AudioVideoGenerator:
 
         task_path = self.file_manager.generate_random_path()
         self.file_manager.create_work_folders()
-        output_audio_path, output_video_path = self.file_manager.get_final_file_names(text_to_speak[1]["text"])
+        output_audio_path, output_video_path = self.file_manager.get_final_file_names(text_to_speak["1"]["text"])
 
         audio_paths = []
         video_paths = []
