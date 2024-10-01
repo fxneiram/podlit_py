@@ -7,11 +7,10 @@ from tkinter import messagebox, simpledialog, scrolledtext
 
 class TreeviewTaskQueue(ttk.Treeview):
     def __init__(self, parent, task_queue, *args, **kwargs):
-        # Crear el contenedor dentro del parent
         self.container = tk.Frame(parent)
         self.container.grid(row=0, column=0, sticky="nsew")
 
-        # Crear el widget ScrolledText (cuadro de texto con scroll) en la columna 0
+        # Crear el widget ScrolledText (cuadro de texto con scroll) en la columna 1 (Derecha)
         self.text_box = scrolledtext.ScrolledText(self.container, wrap=tk.WORD)
         self.text_box.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
 
@@ -22,6 +21,9 @@ class TreeviewTaskQueue(ttk.Treeview):
         self.text_box.tag_configure("colon", foreground="#e06c75")  # Color para :
         self.text_box.tag_configure("key", foreground="#d19a66")    # Color para claves JSON
 
+        self.save_button = tk.Button(self.container, text="Update Task", command=self.save_task)
+        self.save_button.grid(row=1, column=1, sticky="ew", padx=10, pady=10)
+
         # Configurar el Treeview
         super().__init__(self.container, columns=("Task", "Progress", "Status"), show="headings", *args, **kwargs)
         self.heading("Task", text="Task Queue")
@@ -30,13 +32,14 @@ class TreeviewTaskQueue(ttk.Treeview):
         self.column("Progress", width=40)
         self.column("Status", width=100)
 
-        # Colocar el Treeview en la columna 1 del contenedor
-        self.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        # Colocar el Treeview en la columna 0 del contenedor (Izquierda)
+        self.grid(row=0, column=0, rowspan=2, sticky="nsew", padx=10, pady=10)
 
         # Configurar el layout del contenedor para que se expandan los widgets
-        self.container.grid_columnconfigure(0, weight=1)  # Para ScrolledText
-        self.container.grid_columnconfigure(1, weight=1)  # Para Treeview
-        self.container.grid_rowconfigure(0, weight=1)  # Fila única para ambos widgets
+        self.container.grid_columnconfigure(0, weight=1)  # Para el Treeview
+        self.container.grid_columnconfigure(1, weight=1)  # Para ScrolledText y botón Guardar
+        self.container.grid_rowconfigure(0, weight=1)  # Primera fila para ScrolledText y Treeview
+        self.container.grid_rowconfigure(1, weight=0)  # Segunda fila para el botón Guardar
 
         # Enlace a la lista de tareas
         self.task_queue = task_queue
@@ -49,6 +52,23 @@ class TreeviewTaskQueue(ttk.Treeview):
 
         # Evento para seleccionar una fila y cargar el nombre en el cuadro de texto
         self.bind("<<TreeviewSelect>>", self.load_selected_task)
+
+    def save_task(self):
+        selected_items = self.selection()
+        if not selected_items:
+            return
+
+        item = selected_items[0]
+        index = self.index(item)
+
+        task_data = self.text_box.get("1.0", tk.END).strip()
+
+        try:
+            task_data = json.loads(task_data)
+            self.task_queue[index] = task_data
+            messagebox.showinfo("Info", "Task updated successfully.")
+        except json.JSONDecodeError:
+            messagebox.showerror("Error", "Invalid JSON data.")
 
     def insert_colored_json(self, json_text):
         brace_pattern = r"[{}]"
