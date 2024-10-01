@@ -112,6 +112,8 @@ class TreeviewTaskQueue(ttk.Treeview):
     def add_task(self, task):
         if 1 in task and "text" in task[1]:
             display_text = task[1]["text"]
+        elif "1" in task and "text" in task["1"]:
+            display_text = task["1"]["text"]
         else:
             display_text = "Unknown Task"
 
