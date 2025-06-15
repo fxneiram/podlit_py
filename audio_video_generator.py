@@ -41,6 +41,8 @@ class AudioVideoGenerator:
         task_path = self.file_manager.generate_random_path()
         self.file_manager.create_work_folders()
         output_audio_path, output_video_path = self.file_manager.get_final_file_names(text_to_speak["1"]["text"])
+        print(f"Output audio path: {output_audio_path}")
+        print(f"Output video path: {output_video_path}")
 
         audio_paths = []
         video_paths = []
@@ -75,7 +77,7 @@ class AudioVideoGenerator:
         elapsed_time = time.time() - start_time
         minutes, seconds = divmod(elapsed_time, 60)
 
-        progress_callback(100, f"Done Elapsed {int(minutes)} minutes: {int(seconds)} seconds")
+        progress_callback(100, f"Done. Elapsed {int(minutes)} minutes: {int(seconds)} seconds")
 
         while True:
             try:

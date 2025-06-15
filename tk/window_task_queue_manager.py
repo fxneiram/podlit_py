@@ -162,9 +162,11 @@ class WindowTaskQueueManager:
         self.process_next_task()
 
     def btn_action_clear_tasks(self):
+        self.processed_tasks.clear()
         self.task_queue.clear()
         self.tree.delete(*self.tree.get_children())
         self.update_queue_progress(0)
+        self.task_progress['value'] = 0
 
     def callback_update_progress(self, progress, status="Processing"):
         # Task Progres

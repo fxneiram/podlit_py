@@ -132,7 +132,7 @@ class TreeviewTaskQueue(ttk.Treeview):
 
             task_to_delete = None
             for task in self.task_queue:
-                if task[1]["text"] == task_text:
+                if task["1"]["text"] == task_text:
                     task_to_delete = task
                     break
 

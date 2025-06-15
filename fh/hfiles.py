@@ -36,6 +36,7 @@ class FileManager:
         return ''.join(random.choice(chars) for _ in range(length))
 
     def sanitize_filename(self, filename: str) -> str:
-        sanitized = re.sub(r'[<>:"/\\|?*\x00-\x1F]', '', filename)
-        sanitized = sanitized.replace(" ", "_")
-        return sanitized
+        sanitized = re.sub(r'[<>:"/\\|?*]', '_', filename)
+        sanitized = re.sub(r'[^\w\s-]', '', sanitized)
+        sanitized = re.sub(r'[\s]+', '_', sanitized)
+        return sanitized.strip('_')
