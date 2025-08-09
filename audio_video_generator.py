@@ -40,7 +40,9 @@ class AudioVideoGenerator:
 
         task_path = self.file_manager.generate_random_path()
         self.file_manager.create_work_folders()
-        output_audio_path, output_video_path = self.file_manager.get_final_file_names(text_to_speak[1]["text"])
+        # Get the first value from the text_to_speak dictionary
+        first_key = next(iter(text_to_speak))
+        output_audio_path, output_video_path = self.file_manager.get_final_file_names(text_to_speak[first_key]["text"])
 
         audio_paths = []
         video_paths = []

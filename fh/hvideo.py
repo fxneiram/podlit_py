@@ -15,7 +15,18 @@ class VideoManager:
         self.background_color = background_color
         self.text_color = text_color
         self.fps = fps
-        self.font = ImageFont.truetype('arial.ttf', self.font_size)
+        try:
+            # Try to load Arial font
+            self.font = ImageFont.truetype('Arial.ttf', self.font_size)
+        except (OSError, IOError):
+            try:
+                # Try to load a common alternative font on macOS
+                self.font = ImageFont.truetype('/System/Library/Fonts/Supplemental/Arial.ttf', self.font_size)
+            except (OSError, IOError):
+                # Fall back to default system font
+                self.font = ImageFont.load_default()
+                # Scale the default font to match the requested size
+                self.font.size = self.font_size
 
     def generate_fragment(self, path_to_audio, text, output_file):
         fragment_tmp = output_file.replace('.mp4', '.tmp')
