@@ -17,9 +17,10 @@ logging.getLogger("moviepy").setLevel(logging.ERROR)
 
 
 class AudioVideoGenerator:
-    def __init__(self, selected_voice=None):
+    def __init__(self, selected_voice=None, speech_speed=1.0):
         self.selected_voice = selected_voice
         self.available_voices = []
+        self.speech_speed = speech_speed  # Velocidad del habla (1.0 = normal, <1.0 más lento, >1.0 más rápido)
         self.load_voices()
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -29,6 +30,17 @@ class AudioVideoGenerator:
         self.audio_manager = AudioManager()
         self.video_generator = VideoManager()
         self.file_manager = FileManager()
+        
+    def set_speech_speed(self, speed):
+        """Establece la velocidad del habla.
+        
+        Args:
+            speed (float): Velocidad del habla. 
+                          1.0 = velocidad normal
+                          <1.0 = más lento (ej: 0.8 para 80% de la velocidad normal)
+                          >1.0 = más rápido (ej: 1.5 para 150% de la velocidad normal)
+        """
+        self.speech_speed = max(0.1, min(3.0, speed))  # Limitar entre 0.1 y 3.0 para evitar valores extremos
 
     def _prepare_text(self, text):
         # Remove trailing dots
@@ -56,7 +68,13 @@ class AudioVideoGenerator:
             audio_path = os.path.join(cfg.TEMP_DIR, f"{task_path}_tmp_{i}_a.wav")
             video_path = os.path.join(cfg.TEMP_DIR, f"{task_path}_tmp_{i}_v.mp4")
 
-            self.tts.tts_to_file(text=text, speaker_wav=self.selected_voice, language=language, file_path=audio_path)
+            self.tts.tts_to_file(
+                text=text, 
+                speaker_wav=self.selected_voice, 
+                language=language, 
+                file_path=audio_path,
+                speed=self.speech_speed  # Aplicar la velocidad configurada
+            )
             self.audio_manager.add_silence(audio_path, 250, fps=24, before=True, after=True)
 
             self.video_generator.generate_fragment(path_to_audio=audio_path, text=text, output_file=video_path)

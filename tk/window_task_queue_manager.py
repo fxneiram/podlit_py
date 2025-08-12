@@ -44,9 +44,16 @@ class WindowTaskQueueManager:
 
         # Slider for task delay (in minutes)
         tk.Label(top_frame, text="Task Delay (minutes):").grid(row=0, column=4, padx=5, pady=5, sticky="ew")
-        self.delay_slider = tk.Scale(top_frame, from_=0, to=5, orient=tk.HORIZONTAL, length=200,
-                                     command=self.update_task_delay)
+        self.delay_slider = tk.Scale(top_frame, from_=0, to=5, orient=tk.HORIZONTAL, length=150,
+                                    command=self.update_task_delay)
         self.delay_slider.grid(row=0, column=5, padx=5, pady=0, sticky="ew")
+        
+        # Slider for speech speed
+        tk.Label(top_frame, text="Speech Speed:").grid(row=0, column=6, padx=5, pady=5, sticky="ew")
+        self.speed_slider = tk.Scale(top_frame, from_=50, to=200, orient=tk.HORIZONTAL, length=150,
+                                    command=self.update_speech_speed, showvalue=True, resolution=5)
+        self.speed_slider.set(100)  # Valor por defecto: 100% (velocidad normal)
+        self.speed_slider.grid(row=0, column=7, padx=5, pady=0, sticky="ew")
 
         frame = tk.Frame(root)
         frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
@@ -96,8 +103,12 @@ class WindowTaskQueueManager:
         button_frame.grid_columnconfigure(5, weight=1)
 
     def update_task_delay(self, value):
-        minutes = int(value)
-        self.task_delay = minutes * 60 * 1000
+        self.task_delay = int(float(value)) * 60 * 1000  # Convert minutes to milliseconds
+
+    def update_speech_speed(self, value):
+        # Convertir el valor del slider (50-200%) a un factor de velocidad (0.5 a 2.0)
+        speed = float(value) / 100.0
+        self.media_generator.set_speech_speed(speed)
 
     def btn_action_save_queue(self):
         file_path = filedialog.asksaveasfilename(
