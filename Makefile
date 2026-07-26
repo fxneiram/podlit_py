@@ -1,10 +1,10 @@
-.PHONY: install install-ffmpeg install-deps create-env activate-env run
+.PHONY: install install-ffmpeg install-espeak-ng install-deps create-env activate-env run
 
 # Default target when 'make' is run without arguments
 all: install
 
 # Main installation target
-install: install-ffmpeg create-env install-deps
+install: install-ffmpeg install-espeak-ng create-env install-deps
 
 # Install ffmpeg using Homebrew (macOS)
 install-ffmpeg:
@@ -17,6 +17,11 @@ install-ffmpeg:
 	fi
 	@echo "Installing ffmpeg..."
 	brew install ffmpeg
+
+# Install espeak-ng (native CLI binary used by EspeakNGAdapter, not a pip package)
+install-espeak-ng:
+	@echo "Installing espeak-ng..."
+	brew install espeak-ng
 
 # Create conda environment
 create-env:
@@ -52,6 +57,7 @@ help:
 	@echo "Available targets:"
 	@echo "  install         : Install all dependencies (default)"
 	@echo "  install-ffmpeg  : Install ffmpeg using Homebrew"
+	@echo "  install-espeak-ng : Install espeak-ng using Homebrew"
 	@echo "  create-env      : Create conda environment"
 	@echo "  install-deps    : Install Python dependencies"
 	@echo "  run             : Run the application"

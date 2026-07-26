@@ -52,5 +52,5 @@ def test_audio_video_generator_drives_the_real_marytts_adapter(tmp_path):
         params = {key: values[0] for key, values in parse_qs(urlparse(process_url).query).items()}
         assert params["INPUT_TEXT"] == "Hello world"
         assert params["INPUT_TYPE"] == "TEXT"
-        assert params["LOCALE"] == "en"
+        assert params["LOCALE"] == "en_US"
         assert params["VOICE"] == "alice-hsmm"

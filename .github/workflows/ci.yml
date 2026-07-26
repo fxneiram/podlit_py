@@ -16,6 +16,11 @@ jobs:
         with:
           python-version: "3.9"
 
+      # espeak-ng is a native CLI binary (EspeakNGAdapter shells out to it), not a pip
+      # package - needed so its integration test can run against the real binary in CI.
+      - name: Install espeak-ng
+        run: sudo apt-get update && sudo apt-get install -y espeak-ng
+
       # Mirrors Makefile's install-deps target (minus install-ffmpeg, which this
       # runner doesn't need for imports to succeed). Needed because tests/ now
       # imports torch/TTS/pydub/opencv-python transitively via the adapters and
