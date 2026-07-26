@@ -35,6 +35,20 @@ def test_list_voices_parses_file_column(mock_run):
     mock_run.assert_called_once_with(["espeak-ng", "--voices"], check=True, capture_output=True, text=True)
 
 
+def test_voices_are_fetched_once_at_construction_not_per_call(mock_run):
+    """The voice catalog is static for the process's lifetime - caching it in __init__ avoids
+    re-spawning `espeak-ng --voices` on every synthesize() call in a queue of N tasks."""
+    mock_run.side_effect = [_voices_result(), MagicMock(returncode=0)]
+    adapter = EspeakNGAdapter()
+
+    adapter.synthesize(content="Hello", language="en", voice="gmw/en-US", speed=1.0, output_path="out.wav")
+    adapter.list_voices()
+
+    # Only 2 calls total: the --voices fetch in __init__ and the one synthesis call - not a
+    # second --voices spawn for validation inside synthesize(), nor a third from list_voices().
+    assert mock_run.call_count == 2
+
+
 def test_synthesize_sends_plain_text_command(mock_run):
     mock_run.side_effect = [_voices_result(), MagicMock(returncode=0)]
     adapter = EspeakNGAdapter()
@@ -48,7 +62,25 @@ def test_synthesize_sends_plain_text_command(mock_run):
     )
 
     command = mock_run.call_args_list[1].args[0]
-    assert command == ["espeak-ng", "-v", "gmw/en-US", "-s", "175", "-w", "out.wav", "Hello world"]
+    assert command == ["espeak-ng", "-v", "gmw/en-US", "-s", "175", "-w", "out.wav", "--", "Hello world"]
+
+
+def test_synthesize_uses_dashdash_so_content_starting_with_dash_is_not_a_flag(mock_run):
+    """Confirmed live: without "--", espeak-ng treats a leading "-" in content as an option
+    and exits with "invalid option" instead of writing any file."""
+    mock_run.side_effect = [_voices_result(), MagicMock(returncode=0)]
+    adapter = EspeakNGAdapter()
+
+    adapter.synthesize(
+        content="-this looks like a flag",
+        language="en",
+        voice="gmw/en-US",
+        speed=1.0,
+        output_path="out.wav",
+    )
+
+    command = mock_run.call_args_list[1].args[0]
+    assert command[-2:] == ["--", "-this looks like a flag"]
 
 
 def test_synthesize_converts_speed_to_words_per_minute(mock_run):
@@ -148,15 +180,17 @@ def test_synthesize_raises_engine_unavailable_when_binary_missing(mock_run):
         )
 
 
-def test_list_voices_raises_engine_unavailable_when_binary_missing(mock_run):
+def test_construction_raises_engine_unavailable_when_binary_missing(mock_run):
+    """Fetching the voice catalog now happens eagerly at construction, so a missing binary
+    fails fast here rather than lazily on the first list_voices()/synthesize() call."""
     mock_run.side_effect = FileNotFoundError("espeak-ng not found")
-    adapter = EspeakNGAdapter()
 
     with pytest.raises(TTSEngineUnavailableError):
-        adapter.list_voices()
+        EspeakNGAdapter()
 
 
 def test_supports_ssml_is_true(mock_run):
+    mock_run.return_value = _voices_result()
     adapter = EspeakNGAdapter()
 
     assert adapter.supports_ssml() is True

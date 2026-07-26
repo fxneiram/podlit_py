@@ -27,11 +27,10 @@ def test_audio_video_generator_drives_the_real_marytts_adapter(tmp_path):
         patch("audio_video_generator.FileManager") as mock_file_manager_cls,
         patch("audio_video_generator.cfg.TEMP_DIR", str(tmp_path)),
     ):
-        # AudioVideoGenerator.__init__ calls load_voices() (1 call to /voices), then
-        # generate_files -> synthesize() calls list_voices() again to validate the
-        # voice (2nd call to /voices) before finally calling /process.
+        # MaryTTSAdapter.__init__ fetches /voices once and caches it; AudioVideoGenerator's
+        # own load_voices() and synthesize()'s voice validation both hit that cache, so only
+        # one more call (/process) happens after construction.
         mock_urlopen.side_effect = [
-            _mock_response(VOICES_RESPONSE),
             _mock_response(VOICES_RESPONSE),
             _mock_response(b"WAV-BYTES"),
         ]
@@ -48,7 +47,7 @@ def test_audio_video_generator_drives_the_real_marytts_adapter(tmp_path):
 
         generator.generate_files(text_to_speak, progress_callback=MagicMock())
 
-        process_url = mock_urlopen.call_args_list[2].args[0]
+        process_url = mock_urlopen.call_args_list[1].args[0]
         params = {key: values[0] for key, values in parse_qs(urlparse(process_url).query).items()}
         assert params["INPUT_TEXT"] == "Hello world"
         assert params["INPUT_TYPE"] == "TEXT"

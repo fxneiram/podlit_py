@@ -10,10 +10,15 @@ XTTS_V2_MODEL_PATH = "tts_models/multilingual/multi-dataset/xtts_v2"
 
 
 class CoquiTTSAdapter(TextToSpeechPort):
-    """Wraps Coqui XTTS v2. XTTS v2 has no SSML input path at the model level."""
+    """Wraps Coqui XTTS v2. XTTS v2 has no SSML input path at the model level.
+
+    The voice catalog is fetched once at construction and cached - it's static for the life of
+    the process, so there's no need to re-list `voices_dir` on every synthesize() call.
+    """
 
     def __init__(self, voices_dir: str = "sample_voices"):
         self.voices_dir = voices_dir
+        self._voices = self._fetch_voices()
         device = "cuda" if torch.cuda.is_available() else "cpu"
         self.tts = TTS(XTTS_V2_MODEL_PATH, progress_bar=False).to(device)
 
@@ -29,7 +34,7 @@ class CoquiTTSAdapter(TextToSpeechPort):
         if is_ssml:
             raise SSMLNotSupportedError("CoquiTTSAdapter (XTTS v2) does not support SSML input")
 
-        if voice not in self.list_voices():
+        if voice not in self._voices:
             raise VoiceNotFoundError(f"Voice {voice!r} not found in {self.voices_dir!r}")
 
         speaker_wav = os.path.join(self.voices_dir, voice)
@@ -42,7 +47,10 @@ class CoquiTTSAdapter(TextToSpeechPort):
         )
 
     def list_voices(self) -> list[str]:
-        return [name for name in os.listdir(self.voices_dir) if name.endswith(".wav")]
+        return self._voices
 
     def supports_ssml(self) -> bool:
         return False
+
+    def _fetch_voices(self) -> list[str]:
+        return [name for name in os.listdir(self.voices_dir) if name.endswith(".wav")]

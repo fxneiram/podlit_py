@@ -1,3 +1,4 @@
+import os
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -110,3 +111,22 @@ def test_list_voices_returns_wav_filenames_from_voices_dir(mock_tts_class, no_cu
     adapter = CoquiTTSAdapter(voices_dir=str(tmp_path))
 
     assert sorted(adapter.list_voices()) == ["narrator.wav", "second.wav"]
+
+
+def test_voices_are_fetched_once_at_construction_not_per_call(mock_tts_class, no_cuda, voices_dir):
+    """The voice catalog is static for the process's lifetime - caching it in __init__ avoids
+    re-listing voices_dir on every synthesize() call in a queue of N tasks."""
+    with patch("adapters.driven.tts.coqui_tts_adapter.os.listdir", wraps=os.listdir) as mock_listdir:
+        adapter = CoquiTTSAdapter(voices_dir=voices_dir)
+        mock_listdir.assert_called_once_with(voices_dir)
+
+        adapter.synthesize(
+            content="Hello",
+            language="en",
+            voice="narrator.wav",
+            speed=1.0,
+            output_path="out.wav",
+        )
+        adapter.list_voices()
+
+        mock_listdir.assert_called_once_with(voices_dir)

@@ -1,5 +1,25 @@
 # Implement MaryTTSAdapter for the TextToSpeechPort
 
+## Update: two assumptions below were wrong, fixed after live testing
+
+Live testing against a real `synesthesiam/marytts:5.2` container found this original design had
+two incorrect assumptions (see the "Update" section of `specs/tts-engine-spike.md` for the full
+narrative, including the bigger finding — no Spanish support at all — that this adapter's fixes
+don't change):
+
+- **`LOCALE` does not accept a bare language code.** `LOCALE=en` returns HTTP 500; only the full
+  locale (`en_US`) works. Fixed via an explicit `_LANGUAGE_TO_LOCALE` map in the adapter.
+- **`supports_ssml()` now returns `False`, not `True`.** Genuine SSML input
+  (`INPUT_TYPE=SSML` with a `<speak>` root) throws a server-side `DOMException` — a real
+  MaryTTS bug, not a request-shape mistake (tested with both a hand-built MaryXML doc and
+  genuine SSML; only `TEXT`/`RAWMARYXML` work). `is_ssml=True` now always raises
+  `SSMLNotSupportedError`, matching what `supports_ssml()` reports. The speed-adjustment
+  wrapper below was also fixed to use `INPUT_TYPE=RAWMARYXML`, not `SSML`.
+
+The rest of this document is the original design — read it for context on the speed-wrapping
+approach and error handling, but treat the two points above as superseding it where they
+disagree.
+
 Source: https://github.com/fxneiram/podlit_py/issues/35
 Branch: feature/marytts-adapter
 
