@@ -1,11 +1,14 @@
 /temp_audio_files
 /temp_video_files
 /output
-/__pycache__
 /TTS
 /.idea
 # ignore al py cache files
+__pycache__/
 *.pyc
 *.pkf
 *.mp4
 *.wav
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/

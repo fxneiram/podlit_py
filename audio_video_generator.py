@@ -1,41 +1,35 @@
+import logging
 import os
 import time
+import warnings
 
-from TTS.api import TTS
-from pkg import config as cfg
-from fh.hvideo import VideoManager
+from application.ports.tts_port import TextToSpeechPort
 from fh.haudio import AudioManager
 from fh.hfiles import FileManager
-
-import torch
-
-import logging
-import warnings
+from fh.hvideo import VideoManager
+from pkg import config as cfg
 
 warnings.filterwarnings("ignore")
 logging.getLogger("moviepy").setLevel(logging.ERROR)
 
 
 class AudioVideoGenerator:
-    def __init__(self, selected_voice=None, speech_speed=1.0):
+    def __init__(self, tts_engine: TextToSpeechPort, selected_voice=None, speech_speed=1.0):
+        self.tts_engine = tts_engine
         self.selected_voice = selected_voice
-        self.available_voices = []
+        self.available_voices: list[str] = []
         self.speech_speed = speech_speed  # Velocidad del habla (1.0 = normal, <1.0 más lento, >1.0 más rápido)
         self.load_voices()
-
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        model_path = "tts_models/multilingual/multi-dataset/xtts_v2"
-        self.tts = TTS(model_path, progress_bar=False).to(device)
 
         self.audio_manager = AudioManager()
         self.video_generator = VideoManager()
         self.file_manager = FileManager()
-        
+
     def set_speech_speed(self, speed):
         """Establece la velocidad del habla.
-        
+
         Args:
-            speed (float): Velocidad del habla. 
+            speed (float): Velocidad del habla.
                           1.0 = velocidad normal
                           <1.0 = más lento (ej: 0.8 para 80% de la velocidad normal)
                           >1.0 = más rápido (ej: 1.5 para 150% de la velocidad normal)
@@ -47,7 +41,7 @@ class AudioVideoGenerator:
         text = text.endswith(".") and text[:-1] or text
         return text
 
-    def generate_files(self, text_to_speak, progress_callback=None) -> (str, str):
+    def generate_files(self, text_to_speak, progress_callback=None) -> tuple[str, str]:
         start_time = time.time()
 
         task_path = self.file_manager.generate_random_path()
@@ -68,12 +62,12 @@ class AudioVideoGenerator:
             audio_path = os.path.join(cfg.TEMP_DIR, f"{task_path}_tmp_{i}_a.wav")
             video_path = os.path.join(cfg.TEMP_DIR, f"{task_path}_tmp_{i}_v.mp4")
 
-            self.tts.tts_to_file(
-                text=text, 
-                speaker_wav=self.selected_voice, 
-                language=language, 
-                file_path=audio_path,
-                speed=self.speech_speed  # Aplicar la velocidad configurada
+            self.tts_engine.synthesize(
+                content=text,
+                language=language,
+                voice=self.selected_voice,
+                speed=self.speech_speed,
+                output_path=audio_path,
             )
             self.audio_manager.add_silence(audio_path, 250, fps=24, before=True, after=True)
 
@@ -104,19 +98,15 @@ class AudioVideoGenerator:
                 break
             except Exception as e:
                 print(f"Error cleaning temp folders, trying again in 10 seconds: {e}")
-        
-        return output_audio_path, output_video_path
-    
-    def load_voices(self):
-        self.available_voices = []
-        for file in os.listdir("sample_voices"):
-            if file.endswith(".wav"):
-                self.available_voices.append(file)
 
+        return output_audio_path, output_video_path
+
+    def load_voices(self):
+        self.available_voices = self.tts_engine.list_voices()
         return self.available_voices
 
     def change_voice(self, voice):
-        self.selected_voice = f"sample_voices/{voice}"
+        self.selected_voice = voice
 
     def combine_queue(self, tasks=None, file_name=""):
         if len(tasks) < 1:
@@ -124,17 +114,17 @@ class AudioVideoGenerator:
 
         audio_paths = []
         video_paths = []
-        
+
         for task in tasks:
             audio_path, video_path = task
             audio_paths.append(audio_path)
             video_paths.append(video_path)
 
         if file_name == "":
-            output_audio_path = audio_paths[0].replace('.wav', '_mix_.wav')
-            output_video_path = output_audio_path.replace('.wav', '.mp4')
+            output_audio_path = audio_paths[0].replace(".wav", "_mix_.wav")
+            output_video_path = output_audio_path.replace(".wav", ".mp4")
         else:
-            output_audio_path = file_name.replace('.mp4', '.wav')
+            output_audio_path = file_name.replace(".mp4", ".wav")
             output_video_path = file_name
 
         self.audio_manager.combine_audio_fragments(audio_paths, output_audio_path)
