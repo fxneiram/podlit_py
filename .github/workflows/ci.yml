@@ -23,6 +23,11 @@ jobs:
       - name: Install project dependencies
         run: |
           pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          # TTS==0.22.0 depends on spacy[ja]>=3 with no upper bound; spacy's latest
+          # releases require Python >=3.10, which breaks resolution on this project's
+          # pinned Python 3.9. Pin spacy first so TTS's resolver treats it as already
+          # satisfied instead of pulling a Python-3.10-only release.
+          pip install "spacy<3.8"
           pip install TTS==0.22.0
           pip install opencv-python
           pip install pydub
