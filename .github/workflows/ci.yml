@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install dev tools
+        run: pip install ruff mypy pytest
+
+      # Advisory for now: the legacy codebase predates these standards (see
+      # references/coding-standards.md in the dev-workflow skill). Flip
+      # continue-on-error to false once `ruff check .` / `ruff format --check .`
+      # pass clean on the whole repo.
+      - name: Ruff lint
+        run: ruff check .
+        continue-on-error: true
+
+      - name: Ruff format check
+        run: ruff format --check .
+        continue-on-error: true
+
+      - name: Mypy
+        run: mypy .
+        continue-on-error: true
+
+      # Blocking: tolerate "no tests collected" (exit code 5) until tests/ exists,
+      # but a real test failure (or error) still fails the build.
+      - name: Pytest
+        run: pytest || [ "$?" = "5" ]

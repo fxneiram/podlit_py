@@ -22,6 +22,11 @@ implemented by adapters. See [references/hexagonal-architecture.md](references/h
 for the target package layout and the incremental migration strategy — step 5 (implementation)
 applies it.
 
+All code, comments, commit messages, specs, and PR text are **100% English**, comments are
+**added only when necessary** (never to restate what the code already says), and Python code
+follows PEP 8 + type hints on anything touched. See
+[references/coding-standards.md](references/coding-standards.md) — steps 4, 5, and 7 apply it.
+
 ## The phases, in order
 
 1. Intake
@@ -95,6 +100,8 @@ pytest tests/unit -x
   `tests/__init__.py` and a minimal pytest config) rather than inventing a different test runner
   — see [references/architecture.md](references/architecture.md) for what to mock (TTS, torch,
   real ffmpeg calls) so unit tests stay fast.
+- Tests are code too: English names/assertions, comments only where the *why* of a test case
+  isn't obvious from its name — see [references/coding-standards.md](references/coding-standards.md).
 
 ## 5. Implementation (green)
 
@@ -114,6 +121,10 @@ pytest tests/unit -x
 - Write the minimum code to make the unit tests pass. Never let `domain/` or `application/`
   import a concrete library directly (`TTS`, `torch`, `cv2`, `tkinter`) — if a use case needs
   new external behavior, add or extend a port first, then implement it in an adapter.
+- Follow [references/coding-standards.md](references/coding-standards.md): English identifiers/
+  comments, comments only when the code can't express something on its own (a constraint, a
+  workaround, a non-obvious invariant), PEP 8 naming, and type hints on anything you write or
+  touch.
 - Commit as you go, one logical change per commit (e.g. "add Row validation", "extract
   AudioProcessorPort + PydubAudioAdapter", "add speech_speed clamping") — not one commit per
   file and not one commit for the whole feature. Keep any hexagonal-migration commit separate
@@ -134,9 +145,12 @@ pytest tests/unit -x
 
 ## 7. Self-review
 
-Invoke the `/code-review` skill against everything changed on this branch relative to `develop`.
-Treat its findings as required input to the next phase, not optional commentary — this is the
-last automated check before the work becomes visible to anyone else.
+Run `ruff format --check` and `ruff check` first (see
+[references/coding-standards.md](references/coding-standards.md)) so formatting/lint noise never
+shows up as a review finding. Then invoke the `/code-review` skill against everything changed on
+this branch relative to `develop`. Treat its findings as required input to the next phase, not
+optional commentary — this is the last automated check before the work becomes visible to
+anyone else.
 
 ## 8. Fix findings
 
@@ -164,3 +178,21 @@ gh pr checks <pr-number> --watch
 If `--watch` isn't available, poll `gh pr checks <pr-number>` instead. On failure, pull logs
 (`gh run view --log-failed`), fix, push, and re-verify. Don't report the workflow as done while
 any check is red or still pending.
+
+`.github/workflows/ci.yml` runs `ruff`, `mypy`, and `pytest`. The `ruff`/`mypy` steps are
+currently advisory (`continue-on-error: true`) because the legacy codebase predates
+[references/coding-standards.md](references/coding-standards.md) — a red `ruff`/`mypy` step is
+worth a glance but doesn't block the merge yet. `pytest` is blocking (tolerating only "no tests
+collected" until `tests/` has content) — a failing test always blocks.
+
+## Definition of done
+
+Before calling this workflow finished, all of the following should be true:
+
+1. `specs/<slug>.md` reflects what was actually built (updated in step 8 if reality diverged).
+2. `pytest tests/unit tests/integration` passes locally.
+3. `ruff check .` / `ruff format --check .` / `mypy .` were run and any findings in files you
+   touched were addressed (pre-existing findings in untouched files are not your responsibility).
+4. `/code-review` findings from step 7 are each fixed or explicitly acknowledged as out of scope.
+5. The PR is open, its description links the spec, and every CI check is green (or the only
+   red checks are the advisory `ruff`/`mypy` steps noted above).

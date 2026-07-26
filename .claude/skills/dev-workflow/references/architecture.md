@@ -85,10 +85,10 @@ to a task, update the JSON schema there first, then the UI, not the other way ar
 
 ## Testing notes specific to this repo
 
-There is no `tests/` directory or pytest config yet as of this writing — the first
-dev-workflow run that adds tests should also add a minimal `pytest.ini` (or
-`[tool.pytest.ini_options]` in `pyproject.toml`) and `tests/__init__.py`, `tests/unit/__init__.py`,
-`tests/integration/__init__.py`.
+`pyproject.toml` already configures `[tool.pytest.ini_options]` (`testpaths = ["tests"]`), ruff,
+and mypy — see [coding-standards.md](coding-standards.md). There is no `tests/` directory yet,
+though: the first dev-workflow run that adds tests should add `tests/__init__.py`,
+`tests/unit/__init__.py`, `tests/integration/__init__.py` alongside it.
 
 Mock these in unit tests — they are slow, heavy, or require a GPU/model download:
 - `TTS.api.TTS` (and any `.tts_to_file` calls) in `audio_video_generator.py`
