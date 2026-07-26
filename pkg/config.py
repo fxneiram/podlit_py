@@ -1,8 +1,8 @@
 import os
 
 # FOLDER PATHS
-TEMP_DIR = os.getcwd() + '/tmp'
-OUTPUT_DIR = os.getcwd() + '/output'
+TEMP_DIR = os.getcwd() + "/tmp"
+OUTPUT_DIR = os.getcwd() + "/output"
 
 # COLORS
 BACKGROUND_COLOR = (0, 0, 0)
@@ -17,3 +17,8 @@ FONT_SIZE = 80
 # MEDIA
 DURATION_BETWEEN_FRAGMENTS = 0  # ms
 FPS = 24
+
+# TTS ENGINE
+# "coqui" (default, always available) or "magpie" (requires nemo_toolkit installed separately -
+# see `make install-magpie` - not part of the default install).
+TTS_ENGINE = os.environ.get("TTS_ENGINE", "coqui")
