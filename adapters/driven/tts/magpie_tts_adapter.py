@@ -13,11 +13,13 @@ class MagpieTTSAdapter(TextToSpeechPort):
     than real-time - workable for this project's background queue, not real-time use), with
     genuine neural quality and real Spanish support.
 
-    Requires `nemo_toolkit[tts]` installed from its `main` git branch - the stable PyPI release
-    fails to load this checkpoint (tokenizer config references a locale the stable release's
-    validator rejects). This is a large (~2.2GB), unpinned dependency deliberately NOT added to
-    this project's Makefile/CI (see specs/magpie-tts-adapter.md) - install it manually:
-        pip install "nemo_toolkit[tts] @ git+https://github.com/NVIDIA-NeMo/NeMo.git"
+    Requires `nemo_toolkit[tts]` (from its `main` git branch - the stable PyPI release fails to
+    load this checkpoint) and `torchcodec` (a fresh, unpinned `torchaudio` needs it for
+    `.save()`). This is a large (~2.2GB), unpinned dependency deliberately NOT added to this
+    project's Makefile/CI (see specs/magpie-tts-adapter.md) - use `make install-magpie`, ideally
+    in a separate conda env/venv from your main `tts` env: nemo_toolkit's own unpinned
+    requirements can upgrade the CPU-pinned torch/torchaudio (and possibly numpy==1.26.4) that
+    `make install-deps` set up for Coqui/eSpeak-NG.
 
     Deliberate limitation, confirmed with the user: MagpieTTS's public API has NO prosody
     control whatsoever - no SSML, no style/tone description, not even a numeric speed knob.
