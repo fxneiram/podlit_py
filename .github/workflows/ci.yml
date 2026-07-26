@@ -16,6 +16,27 @@ jobs:
         with:
           python-version: "3.9"
 
+      # Mirrors Makefile's install-deps target (minus install-ffmpeg, which this
+      # runner doesn't need for imports to succeed). Needed because tests/ now
+      # imports torch/TTS/pydub/opencv-python transitively via the adapters and
+      # fh/ modules under test.
+      - name: Install project dependencies
+        run: |
+          pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          # TTS==0.22.0's transitive dependencies keep releasing Python-3.10-only
+          # versions without declaring it in package metadata (pip can't skip them
+          # automatically the way it does for well-behaved packages like thinc), so
+          # they break at import time rather than at install time. Pin each one to
+          # the last version known to work on this project's pinned Python 3.9.
+          pip install "spacy<3.8"
+          # bangla 0.0.3-0.0.5 (all released the same day) also carry the bool|None
+          # syntax - only 0.0.1/0.0.2 (2017/2018) predate it.
+          pip install "bangla<0.0.3"
+          pip install TTS==0.22.0
+          pip install opencv-python
+          pip install pydub
+          pip install numpy==1.26.4
+
       - name: Install dev tools
         run: pip install ruff mypy pytest
 
