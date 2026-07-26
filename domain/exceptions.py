@@ -4,3 +4,7 @@ class SSMLNotSupportedError(Exception):
 
 class VoiceNotFoundError(Exception):
     """Raised when a requested voice identifier isn't available for the current engine."""
+
+
+class TTSEngineUnavailableError(Exception):
+    """Raised when a TTS engine adapter can't reach its backing service (e.g. a local server)."""
