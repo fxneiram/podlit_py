@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from adapters.driven.tts.coqui_tts_adapter import CoquiTTSAdapter
-from domain.exceptions import SSMLNotSupportedError
+from domain.exceptions import SSMLNotSupportedError, VoiceNotFoundError
 
 
 @pytest.fixture
@@ -39,8 +39,14 @@ def test_selects_cuda_device_when_available(mock_tts_class, cuda_available):
     mock_tts_class.return_value.to.assert_called_once_with("cuda")
 
 
-def test_synthesize_resolves_voice_to_sample_voices_path(mock_tts_class, no_cuda):
-    adapter = CoquiTTSAdapter()
+@pytest.fixture
+def voices_dir(tmp_path):
+    (tmp_path / "narrator.wav").write_bytes(b"")
+    return str(tmp_path)
+
+
+def test_synthesize_resolves_voice_to_sample_voices_path(mock_tts_class, no_cuda, voices_dir):
+    adapter = CoquiTTSAdapter(voices_dir=voices_dir)
 
     adapter.synthesize(
         content="Hello world",
@@ -52,15 +58,15 @@ def test_synthesize_resolves_voice_to_sample_voices_path(mock_tts_class, no_cuda
 
     mock_tts_class.return_value.tts_to_file.assert_called_once_with(
         text="Hello world",
-        speaker_wav="sample_voices/narrator.wav",
+        speaker_wav=f"{voices_dir}/narrator.wav",
         language="en",
         file_path="out.wav",
         speed=1.2,
     )
 
 
-def test_synthesize_raises_when_ssml_requested(mock_tts_class, no_cuda):
-    adapter = CoquiTTSAdapter()
+def test_synthesize_raises_when_ssml_requested(mock_tts_class, no_cuda, voices_dir):
+    adapter = CoquiTTSAdapter(voices_dir=voices_dir)
 
     with pytest.raises(SSMLNotSupportedError):
         adapter.synthesize(
@@ -70,6 +76,21 @@ def test_synthesize_raises_when_ssml_requested(mock_tts_class, no_cuda):
             speed=1.0,
             output_path="out.wav",
             is_ssml=True,
+        )
+
+    mock_tts_class.return_value.tts_to_file.assert_not_called()
+
+
+def test_synthesize_raises_when_voice_not_found(mock_tts_class, no_cuda, voices_dir):
+    adapter = CoquiTTSAdapter(voices_dir=voices_dir)
+
+    with pytest.raises(VoiceNotFoundError):
+        adapter.synthesize(
+            content="Hello world",
+            language="en",
+            voice="missing.wav",
+            speed=1.0,
+            output_path="out.wav",
         )
 
     mock_tts_class.return_value.tts_to_file.assert_not_called()

@@ -4,7 +4,7 @@ import torch
 from TTS.api import TTS
 
 from application.ports.tts_port import TextToSpeechPort
-from domain.exceptions import SSMLNotSupportedError
+from domain.exceptions import SSMLNotSupportedError, VoiceNotFoundError
 
 XTTS_V2_MODEL_PATH = "tts_models/multilingual/multi-dataset/xtts_v2"
 
@@ -28,6 +28,9 @@ class CoquiTTSAdapter(TextToSpeechPort):
     ) -> None:
         if is_ssml:
             raise SSMLNotSupportedError("CoquiTTSAdapter (XTTS v2) does not support SSML input")
+
+        if voice not in self.list_voices():
+            raise VoiceNotFoundError(f"Voice {voice!r} not found in {self.voices_dir!r}")
 
         speaker_wav = os.path.join(self.voices_dir, voice)
         self.tts.tts_to_file(

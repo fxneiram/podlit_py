@@ -97,7 +97,7 @@ class AudioVideoGenerator:
                 time.sleep(10)
                 break
             except Exception as e:
-                print(f"Error cleaning temp folders, trying again in 10 seconds: {e}")
+                logging.warning("Error cleaning temp folders, trying again in 10 seconds: %s", e)
 
         return output_audio_path, output_video_path
 
