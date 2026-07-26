@@ -16,6 +16,18 @@ jobs:
         with:
           python-version: "3.9"
 
+      # Mirrors Makefile's install-deps target (minus install-ffmpeg, which this
+      # runner doesn't need for imports to succeed). Needed because tests/ now
+      # imports torch/TTS/pydub/opencv-python transitively via the adapters and
+      # fh/ modules under test.
+      - name: Install project dependencies
+        run: |
+          pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install TTS==0.22.0
+          pip install opencv-python
+          pip install pydub
+          pip install numpy==1.26.4
+
       - name: Install dev tools
         run: pip install ruff mypy pytest
 
