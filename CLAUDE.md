@@ -34,6 +34,11 @@ There is no test suite in the repo yet. The dev-workflow skill (see below) intro
 `tests/unit/` and `tests/integration/` with pytest as work happens — run a single test the
 normal pytest way once tests exist: `pytest tests/unit/test_foo.py::test_bar`.
 
+`pyproject.toml` configures `ruff` (lint + format), `mypy`, and pytest; `ruff check .` /
+`ruff format --check .` / `mypy .` / `pytest` also run in CI (`.github/workflows/ci.yml`) on
+every PR into `develop` — `ruff`/`mypy` are advisory for now since the legacy code predates
+these standards (see `coding-standards.md` below), `pytest` is blocking.
+
 Dependency versions are pinned deliberately (`torch`/`torchaudio` CPU wheels, `TTS==0.22.0`,
 `numpy==1.26.4`) — newer numpy breaks TTS 0.22.0's C extensions. Don't bump these without reason.
 
@@ -94,3 +99,10 @@ CI verification. It also mandates migrating the codebase toward a hexagonal arch
 (ports & adapters) — the target package layout and incremental migration strategy are in
 `.claude/skills/dev-workflow/references/hexagonal-architecture.md`. Read that before deciding
 where new code belongs; the flat layout described above is the *current*, pre-migration state.
+
+Coding standards (100% English code/comments/commits, comments only when necessary, PEP 8 +
+type hints, typed domain exceptions instead of bare `except Exception`, `subprocess.run` with
+arg lists instead of `os.system`, `logging` instead of `print`, `ruff`/`mypy` for lint/format/
+types) are in `.claude/skills/dev-workflow/references/coding-standards.md`. The current codebase
+predates this standard (Spanish comments, bare excepts, `os.system` calls in `fh/hvideo.py`,
+stray `print`s) — fix a module's instances as you touch it, don't do a standalone cleanup pass.
