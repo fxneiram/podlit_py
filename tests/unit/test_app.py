@@ -5,7 +5,9 @@ import pytest
 from app import build_tts_engine
 
 
-def test_build_tts_engine_defaults_to_coqui():
+def test_build_tts_engine_selects_coqui():
+    """Tests dispatch on an explicit "coqui" argument - not the *default* resolution of
+    TTS_ENGINE itself, which is covered separately in tests/unit/test_config.py."""
     with patch("app.CoquiTTSAdapter") as mock_coqui_cls:
         engine = build_tts_engine("coqui")
 

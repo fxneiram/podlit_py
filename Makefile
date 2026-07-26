@@ -49,6 +49,9 @@ install-deps:
 # torchcodec is also required: a fresh, unpinned torchaudio moved its .save() default backend
 # to require it (confirmed while running the #37 regression test) - without it, synthesize()
 # fails with "ImportError: TorchCodec is required for save_with_torchcodec".
+# WARNING: nemo_toolkit's own unpinned requirements can upgrade the pinned CPU torch/torchaudio
+# (and possibly numpy==1.26.4) that `install-deps` set up for Coqui/eSpeak-NG. Run this in a
+# separate conda env/venv from your main `tts` env unless you're fine with those upgrading.
 install-magpie:
 	@echo "Installing nemo_toolkit from its main branch (large, unpinned - this will take a while)..."
 	pip install "nemo_toolkit[tts] @ git+https://github.com/NVIDIA-NeMo/NeMo.git"
