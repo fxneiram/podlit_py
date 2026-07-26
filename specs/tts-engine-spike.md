@@ -53,7 +53,32 @@ Two things worth flagging that change the *framing* of this decision but not the
   (`Row`/`Task` gaining an `ssml` field, issue #27) are both framed around actual SSML tags, and
   redesigning that framing is a bigger decision than this spike is scoped for.
 
-## Recommendation: MaryTTS as primary, eSpeak-NG as a documented fallback
+## Update (during #35): recommendation reversed — eSpeak-NG is now primary
+
+The recommendation below was made on paper, before either engine was actually run. During #35,
+live testing against a real `synesthesiam/marytts:5.2` container (Docker) found that MaryTTS
+fails on **both** of the reasons it was picked over Piper:
+
+- **No Spanish voice/locale exists for MaryTTS at all** — confirmed via its own `/locales`
+  endpoint (only `te, en_US, en_GB, de, fr, it, sv, ru, tr`), and via research showing MaryTTS
+  never officially released one. This is disqualifying on its own: this project's core purpose
+  is bilingual EN/ES content.
+- **Genuine SSML input throws a server-side `DOMException`** on that image — a longstanding
+  MaryTTS bug in its SSML→MaryXML pipeline, not a request-shape mistake (confirmed by testing
+  both a hand-built `<maryxml>` document and genuine `<speak>...</speak>` SSML — both fail the
+  same way; only `TEXT` and `RAWMARYXML` input types work).
+
+eSpeak-NG — installed as a native binary, no Docker/server needed at all — was live-tested as
+the replacement and passed both checks immediately: real Spanish (multiple regional voices:
+Spain, Mexico, Venezuela) and real SSML (`<speak>`, `<emphasis>`, `<break>`, `<prosody rate>`)
+both worked on the first try. See `specs/espeak-ng-adapter.md` for the adapter built from this.
+
+`MaryTTSAdapter` (built in #35 before this was discovered) stays in the codebase, bugs fixed and
+limitations now accurately documented — the port design's whole point was supporting more than
+one engine, and a second, more limited implementation costs nothing to keep. But **eSpeak-NG,
+not MaryTTS, is the recommendation for #37's cutover.**
+
+## Original recommendation (superseded, kept for context): MaryTTS as primary, eSpeak-NG as a documented fallback
 
 **MaryTTS** is the pick for the primary engine. Reasoning:
 
