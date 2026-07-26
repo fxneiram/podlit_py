@@ -29,7 +29,9 @@ jobs:
           # they break at import time rather than at install time. Pin each one to
           # the last version known to work on this project's pinned Python 3.9.
           pip install "spacy<3.8"
-          pip install "bangla<0.0.6"
+          # bangla 0.0.3-0.0.5 (all released the same day) also carry the bool|None
+          # syntax - only 0.0.1/0.0.2 (2017/2018) predate it.
+          pip install "bangla<0.0.3"
           pip install TTS==0.22.0
           pip install opencv-python
           pip install pydub
