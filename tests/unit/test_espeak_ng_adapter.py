@@ -8,8 +8,8 @@ from domain.exceptions import TTSEngineUnavailableError, VoiceNotFoundError
 
 VOICES_OUTPUT = (
     "Pty Language       Age/Gender VoiceName          File                 Other Languages\n"
-    " 5  en-us           --/M      English_(America)  en/en-us             \n"
-    " 5  es-419          --/M      Spanish_(Latin_America) roa/es-419       \n"
+    " 2  en-us           --/M      English_(America)  gmw/en-US            (en 3)\n"
+    " 5  es-419          --/M      Spanish_(Latin_America) roa/es-419       (es-mx 6)\n"
 )
 
 
@@ -24,11 +24,14 @@ def _voices_result():
     return MagicMock(stdout=VOICES_OUTPUT, returncode=0)
 
 
-def test_list_voices_parses_voice_name_column(mock_run):
+def test_list_voices_parses_file_column(mock_run):
+    """Column 4 (File), not VoiceName - `-v` rejects VoiceName values in practice
+    (confirmed against the real binary: "Error: The specified espeak-ng voice does not
+    exist"), and Language (column 1) isn't guaranteed unique per voice."""
     mock_run.return_value = _voices_result()
     adapter = EspeakNGAdapter()
 
-    assert adapter.list_voices() == ["English_(America)", "Spanish_(Latin_America)"]
+    assert adapter.list_voices() == ["gmw/en-US", "roa/es-419"]
     mock_run.assert_called_once_with(["espeak-ng", "--voices"], check=True, capture_output=True, text=True)
 
 
@@ -39,13 +42,13 @@ def test_synthesize_sends_plain_text_command(mock_run):
     adapter.synthesize(
         content="Hello world",
         language="en",
-        voice="English_(America)",
+        voice="gmw/en-US",
         speed=1.0,
         output_path="out.wav",
     )
 
     command = mock_run.call_args_list[1].args[0]
-    assert command == ["espeak-ng", "-v", "English_(America)", "-s", "175", "-w", "out.wav", "Hello world"]
+    assert command == ["espeak-ng", "-v", "gmw/en-US", "-s", "175", "-w", "out.wav", "Hello world"]
 
 
 def test_synthesize_converts_speed_to_words_per_minute(mock_run):
@@ -55,7 +58,7 @@ def test_synthesize_converts_speed_to_words_per_minute(mock_run):
     adapter.synthesize(
         content="Hello world",
         language="en",
-        voice="English_(America)",
+        voice="gmw/en-US",
         speed=1.2,
         output_path="out.wav",
     )
@@ -72,7 +75,7 @@ def test_synthesize_adds_markup_flag_for_ssml(mock_run):
     adapter.synthesize(
         content="<speak>Hello <emphasis>world</emphasis></speak>",
         language="en",
-        voice="English_(America)",
+        voice="gmw/en-US",
         speed=1.0,
         output_path="out.wav",
         is_ssml=True,
@@ -92,7 +95,7 @@ def test_synthesize_combines_speed_and_ssml(mock_run):
     adapter.synthesize(
         content="<speak>Hello</speak>",
         language="en",
-        voice="English_(America)",
+        voice="gmw/en-US",
         speed=1.4,
         output_path="out.wav",
         is_ssml=True,
@@ -125,7 +128,7 @@ def test_synthesize_raises_engine_unavailable_on_process_error(mock_run):
         adapter.synthesize(
             content="Hello",
             language="en",
-            voice="English_(America)",
+            voice="gmw/en-US",
             speed=1.0,
             output_path="out.wav",
         )
@@ -139,7 +142,7 @@ def test_synthesize_raises_engine_unavailable_when_binary_missing(mock_run):
         adapter.synthesize(
             content="Hello",
             language="en",
-            voice="English_(America)",
+            voice="gmw/en-US",
             speed=1.0,
             output_path="out.wav",
         )

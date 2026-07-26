@@ -48,8 +48,12 @@ class EspeakNGAdapter(TextToSpeechPort):
         except (subprocess.CalledProcessError, FileNotFoundError) as error:
             raise TTSEngineUnavailableError(f"espeak-ng --voices failed: {error}") from error
 
+        # Column 4 (File, e.g. "gmw/en-US") is what -v actually accepts - confirmed live.
+        # Column 3 (VoiceName, e.g. "English_(America)") looks like an identifier but -v
+        # rejects it ("Error: The specified espeak-ng voice does not exist"); column 1
+        # (Language, e.g. "en-us") is accepted too but isn't guaranteed unique per voice.
         lines = result.stdout.strip().splitlines()[1:]  # skip the header row
-        return [line.split()[3] for line in lines if line.strip()]
+        return [line.split()[4] for line in lines if line.strip()]
 
     def supports_ssml(self) -> bool:
         return True
