@@ -13,7 +13,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from adapters.driven.tts.magpie_tts_adapter import MagpieTTSAdapter
-from domain.exceptions import SSMLNotSupportedError, VoiceNotFoundError
+from domain.exceptions import SSMLNotSupportedError, VoiceNotFoundError, VoiceUploadNotSupportedError
 
 
 class FakeMagpieTTSModel:
@@ -131,3 +131,16 @@ def test_supports_ssml_is_false(stubbed_nemo, mock_torchaudio_save):
     adapter = MagpieTTSAdapter()
 
     assert adapter.supports_ssml() is False
+
+
+def test_supports_voice_upload_is_false(stubbed_nemo, mock_torchaudio_save):
+    adapter = MagpieTTSAdapter()
+
+    assert adapter.supports_voice_upload() is False
+
+
+def test_add_voice_raises_voice_upload_not_supported(stubbed_nemo, mock_torchaudio_save):
+    adapter = MagpieTTSAdapter()
+
+    with pytest.raises(VoiceUploadNotSupportedError):
+        adapter.add_voice("speaker_0.wav", b"content")

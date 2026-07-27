@@ -28,6 +28,12 @@ class FakeTTSAdapter(TextToSpeechPort):
     def supports_ssml(self):
         return False
 
+    def supports_voice_upload(self):
+        return False
+
+    def add_voice(self, filename, content):
+        raise NotImplementedError
+
 
 @pytest.fixture
 def mocked_media_managers():

@@ -52,5 +52,19 @@ class CoquiTTSAdapter(TextToSpeechPort):
     def supports_ssml(self) -> bool:
         return False
 
+    def supports_voice_upload(self) -> bool:
+        return True
+
+    def add_voice(self, filename: str, content: bytes) -> None:
+        # os.path.basename strips any directory components (e.g. "../../etc/passwd.wav"), so
+        # an uploaded filename can never write outside voices_dir.
+        safe_filename = os.path.basename(filename)
+        if not safe_filename.endswith(".wav"):
+            raise ValueError(f"Voice sample {filename!r} must be a .wav file")
+
+        with open(os.path.join(self.voices_dir, safe_filename), "wb") as voice_file:
+            voice_file.write(content)
+        self._voices = self._fetch_voices()
+
     def _fetch_voices(self) -> list[str]:
         return [name for name in os.listdir(self.voices_dir) if name.endswith(".wav")]
