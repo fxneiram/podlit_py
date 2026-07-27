@@ -49,7 +49,7 @@ class Task:
         for key, value in parsed_text.items():
             if not isinstance(key, int):
                 raise ValueError(f"Key {key} is not an integer.")
-            if "text" not in value or "language" not in value:
+            if not isinstance(value, dict) or "text" not in value or "language" not in value:
                 raise ValueError(f"Entry {key} is incorrectly formatted.")
             if not isinstance(value["text"], str) or not isinstance(value["language"], str):
                 raise ValueError(f"'text' or 'language' in {key} are not strings.")

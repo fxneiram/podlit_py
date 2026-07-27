@@ -58,7 +58,12 @@ def test_add_silence_result_is_aligned_to_frame_boundary(tmp_path):
     assert remainder < 1 or (frame_duration_ms - remainder) < 1
 
 
-def test_combine_audio_fragments_concatenates_all_inputs(tmp_path):
+def test_combine_audio_fragments_concatenates_all_inputs(tmp_path, monkeypatch):
+    """DURATION_BETWEEN_FRAGMENTS is 0 in this project's actual config, which would make this
+    assertion pass identically whether the silence-insertion loop ran 0, 1, or N times - so a
+    non-zero gap is patched in here specifically to make the inter-fragment silence count
+    something this test can actually fail on."""
+    monkeypatch.setattr(cfg, "DURATION_BETWEEN_FRAGMENTS", 100)
     frag1 = _silent_wav(tmp_path / "frag1.wav", 500)
     frag2 = _silent_wav(tmp_path / "frag2.wav", 700)
     output_path = tmp_path / "combined.wav"
@@ -67,11 +72,12 @@ def test_combine_audio_fragments_concatenates_all_inputs(tmp_path):
     manager.combine_audio_fragments([str(frag1), str(frag2)], str(output_path))
 
     result = AudioSegment.from_wav(str(output_path))
-    expected_duration = cfg.DURATION_BETWEEN_FRAGMENTS * 3 + 500 + 700
+    expected_duration = 100 * 3 + 500 + 700  # one leading silence + one trailing per fragment
     assert abs(len(result) - expected_duration) <= 5
 
 
-def test_combine_audio_fragments_with_single_fragment(tmp_path):
+def test_combine_audio_fragments_with_single_fragment(tmp_path, monkeypatch):
+    monkeypatch.setattr(cfg, "DURATION_BETWEEN_FRAGMENTS", 100)
     frag = _silent_wav(tmp_path / "frag.wav", 400)
     output_path = tmp_path / "combined.wav"
     manager = AudioManager()
@@ -79,5 +85,5 @@ def test_combine_audio_fragments_with_single_fragment(tmp_path):
     manager.combine_audio_fragments([str(frag)], str(output_path))
 
     result = AudioSegment.from_wav(str(output_path))
-    expected_duration = cfg.DURATION_BETWEEN_FRAGMENTS * 2 + 400
+    expected_duration = 100 * 2 + 400
     assert abs(len(result) - expected_duration) <= 5

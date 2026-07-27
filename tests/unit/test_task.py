@@ -61,6 +61,13 @@ class TestValidateInput:
         with pytest.raises(ValueError, match="incorrectly formatted"):
             Task.validate_input("{1: {'text': 'Hello.'}}")
 
+    def test_raises_clean_error_when_entry_value_is_not_a_dict(self):
+        """Entry values that aren't dicts (e.g. a bare int) must raise the same clean
+        ValueError as any other malformed entry, not a TypeError from `"text" not in value`
+        being applied to a non-dict."""
+        with pytest.raises(ValueError, match="incorrectly formatted"):
+            Task.validate_input("{1: 5}")
+
     def test_raises_when_text_or_language_not_strings(self):
         with pytest.raises(ValueError, match="are not strings"):
             Task.validate_input("{1: {'text': 123, 'language': 'en'}}")
