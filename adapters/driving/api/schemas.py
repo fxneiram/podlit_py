@@ -17,3 +17,8 @@ class TaskResponse(BaseModel):
 
 class QueueReplaceRequest(BaseModel):
     raw_texts: list[str]
+
+
+class QueueProcessRequest(BaseModel):
+    task_delay_ms: int = 0
+    mix_queue: bool = False
