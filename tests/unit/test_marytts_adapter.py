@@ -10,6 +10,7 @@ from domain.exceptions import (
     SSMLNotSupportedError,
     TTSEngineUnavailableError,
     VoiceNotFoundError,
+    VoiceUploadNotSupportedError,
 )
 
 VOICES_RESPONSE = b"alice-hsmm en_US female\nbits3-hsmm en_US male\n"
@@ -156,6 +157,21 @@ def test_supports_ssml_is_false(mock_urlopen):
     adapter = MaryTTSAdapter()
 
     assert adapter.supports_ssml() is False
+
+
+def test_supports_voice_upload_is_false(mock_urlopen):
+    mock_urlopen.return_value = _mock_response(VOICES_RESPONSE)
+    adapter = MaryTTSAdapter()
+
+    assert adapter.supports_voice_upload() is False
+
+
+def test_add_voice_raises_voice_upload_not_supported(mock_urlopen):
+    mock_urlopen.return_value = _mock_response(VOICES_RESPONSE)
+    adapter = MaryTTSAdapter()
+
+    with pytest.raises(VoiceUploadNotSupportedError):
+        adapter.add_voice("alice-hsmm.wav", b"content")
 
 
 def test_synthesize_raises_language_not_supported_for_spanish(mock_urlopen, tmp_path):

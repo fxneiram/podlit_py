@@ -32,3 +32,15 @@ class TextToSpeechPort(ABC):
     @abstractmethod
     def supports_ssml(self) -> bool:
         """Whether this engine can accept `is_ssml=True` input."""
+
+    @abstractmethod
+    def supports_voice_upload(self) -> bool:
+        """Whether this engine can accept new voice samples via add_voice()."""
+
+    @abstractmethod
+    def add_voice(self, filename: str, content: bytes) -> None:
+        """Store a new voice sample so it appears in list_voices() afterwards.
+
+        Raises:
+            VoiceUploadNotSupportedError: if supports_voice_upload() is False.
+        """

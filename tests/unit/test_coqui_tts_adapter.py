@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -111,6 +112,40 @@ def test_list_voices_returns_wav_filenames_from_voices_dir(mock_tts_class, no_cu
     adapter = CoquiTTSAdapter(voices_dir=str(tmp_path))
 
     assert sorted(adapter.list_voices()) == ["narrator.wav", "second.wav"]
+
+
+def test_supports_voice_upload_is_true(mock_tts_class, no_cuda):
+    adapter = CoquiTTSAdapter()
+
+    assert adapter.supports_voice_upload() is True
+
+
+def test_add_voice_writes_file_and_refreshes_list(mock_tts_class, no_cuda, voices_dir):
+    adapter = CoquiTTSAdapter(voices_dir=voices_dir)
+
+    adapter.add_voice("second.wav", b"RIFF-fake-wav-bytes")
+
+    assert (Path(voices_dir) / "second.wav").read_bytes() == b"RIFF-fake-wav-bytes"
+    assert sorted(adapter.list_voices()) == ["narrator.wav", "second.wav"]
+
+
+def test_add_voice_rejects_non_wav_filename(mock_tts_class, no_cuda, voices_dir):
+    adapter = CoquiTTSAdapter(voices_dir=voices_dir)
+
+    with pytest.raises(ValueError):
+        adapter.add_voice("second.mp3", b"not a wav")
+
+    assert not (Path(voices_dir) / "second.mp3").exists()
+
+
+def test_add_voice_sanitizes_path_traversal_attempt(mock_tts_class, no_cuda, voices_dir):
+    adapter = CoquiTTSAdapter(voices_dir=voices_dir)
+    escaped_path = Path(voices_dir).parent / "etc" / "passwd.wav"
+
+    adapter.add_voice("../../etc/passwd.wav", b"payload")
+
+    assert (Path(voices_dir) / "passwd.wav").read_bytes() == b"payload"
+    assert not escaped_path.exists()
 
 
 def test_voices_are_fetched_once_at_construction_not_per_call(mock_tts_class, no_cuda, voices_dir):

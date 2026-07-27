@@ -20,3 +20,7 @@ class TaskNotFoundError(Exception):
 
 class QueueAlreadyProcessingError(Exception):
     """Raised when queue processing is started while a previous run is still in progress."""
+
+
+class VoiceUploadNotSupportedError(Exception):
+    """Raised when a new voice sample is uploaded to an engine whose adapter doesn't support it."""

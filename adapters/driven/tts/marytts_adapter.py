@@ -8,6 +8,7 @@ from domain.exceptions import (
     SSMLNotSupportedError,
     TTSEngineUnavailableError,
     VoiceNotFoundError,
+    VoiceUploadNotSupportedError,
 )
 
 DEFAULT_BASE_URL = "http://localhost:59125"
@@ -105,6 +106,12 @@ class MaryTTSAdapter(TextToSpeechPort):
 
     def supports_ssml(self) -> bool:
         return False
+
+    def supports_voice_upload(self) -> bool:
+        return False
+
+    def add_voice(self, filename: str, content: bytes) -> None:
+        raise VoiceUploadNotSupportedError("MaryTTSAdapter uses server-side installed voices, no sample upload")
 
     def _fetch_voices(self) -> list[str]:
         try:

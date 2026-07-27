@@ -1,7 +1,7 @@
 import subprocess
 
 from application.ports.tts_port import TextToSpeechPort
-from domain.exceptions import TTSEngineUnavailableError, VoiceNotFoundError
+from domain.exceptions import TTSEngineUnavailableError, VoiceNotFoundError, VoiceUploadNotSupportedError
 
 DEFAULT_WORDS_PER_MINUTE = 175
 ESPEAK_NG_BINARY = "espeak-ng"
@@ -55,6 +55,12 @@ class EspeakNGAdapter(TextToSpeechPort):
 
     def supports_ssml(self) -> bool:
         return True
+
+    def supports_voice_upload(self) -> bool:
+        return False
+
+    def add_voice(self, filename: str, content: bytes) -> None:
+        raise VoiceUploadNotSupportedError("EspeakNGAdapter uses fixed system voices, no sample upload")
 
     def _fetch_voices(self) -> list[str]:
         try:

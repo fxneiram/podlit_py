@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from adapters.driven.tts.espeak_ng_adapter import EspeakNGAdapter
-from domain.exceptions import TTSEngineUnavailableError, VoiceNotFoundError
+from domain.exceptions import TTSEngineUnavailableError, VoiceNotFoundError, VoiceUploadNotSupportedError
 
 VOICES_OUTPUT = (
     "Pty Language       Age/Gender VoiceName          File                 Other Languages\n"
@@ -194,3 +194,18 @@ def test_supports_ssml_is_true(mock_run):
     adapter = EspeakNGAdapter()
 
     assert adapter.supports_ssml() is True
+
+
+def test_supports_voice_upload_is_false(mock_run):
+    mock_run.return_value = _voices_result()
+    adapter = EspeakNGAdapter()
+
+    assert adapter.supports_voice_upload() is False
+
+
+def test_add_voice_raises_voice_upload_not_supported(mock_run):
+    mock_run.return_value = _voices_result()
+    adapter = EspeakNGAdapter()
+
+    with pytest.raises(VoiceUploadNotSupportedError):
+        adapter.add_voice("narrator.wav", b"content")

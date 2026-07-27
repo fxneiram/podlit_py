@@ -2,7 +2,7 @@ import torch
 import torchaudio
 
 from application.ports.tts_port import TextToSpeechPort
-from domain.exceptions import SSMLNotSupportedError, VoiceNotFoundError
+from domain.exceptions import SSMLNotSupportedError, VoiceNotFoundError, VoiceUploadNotSupportedError
 
 MAGPIE_MODEL_NAME = "nvidia/magpie_tts_multilingual_357m"
 SAMPLE_RATE = 22050
@@ -61,6 +61,12 @@ class MagpieTTSAdapter(TextToSpeechPort):
 
     def supports_ssml(self) -> bool:
         return False
+
+    def supports_voice_upload(self) -> bool:
+        return False
+
+    def add_voice(self, filename: str, content: bytes) -> None:
+        raise VoiceUploadNotSupportedError("MagpieTTSAdapter uses a fixed set of baked-in speakers, no sample upload")
 
     @staticmethod
     def _voice_to_speaker_index(voice: str) -> int:
