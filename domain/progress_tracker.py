@@ -1,11 +1,12 @@
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
 class ProgressState:
     status: str  # "idle" | "running" | "completed"
     queue_progress: float = 0.0  # 0-100, overall
-    current_task_index: int | None = None
+    current_task_index: Optional[int] = None
     current_task_progress: float = 0.0  # 0-100, current task only
     current_task_status: str = ""
 

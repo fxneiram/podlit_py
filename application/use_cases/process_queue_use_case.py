@@ -1,6 +1,6 @@
 import threading
 import time
-from typing import Any, Protocol
+from typing import Any, Optional, Protocol
 
 from application.ports.task_repository_port import TaskRepositoryPort
 from domain.exceptions import QueueAlreadyProcessingError
@@ -27,7 +27,7 @@ class ProcessQueueUseCase:
         self._repository = repository
         self._media_generator = media_generator
         self._progress_tracker = progress_tracker
-        self._thread: threading.Thread | None = None
+        self._thread: Optional[threading.Thread] = None
 
     def is_running(self) -> bool:
         return self._thread is not None and self._thread.is_alive()
@@ -40,7 +40,7 @@ class ProcessQueueUseCase:
         self._thread = threading.Thread(target=self._run, args=(task_delay_ms, mix_queue), daemon=True)
         self._thread.start()
 
-    def wait_until_done(self, timeout: float | None = None) -> None:
+    def wait_until_done(self, timeout: Optional[float] = None) -> None:
         if self._thread is not None:
             self._thread.join(timeout=timeout)
 

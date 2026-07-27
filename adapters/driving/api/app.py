@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import FastAPI
 
 from adapters.driving.api.routes import router
@@ -8,8 +10,8 @@ from domain.progress_tracker import ProgressTracker
 
 def create_app(
     use_case: ManageTaskQueueUseCase,
-    process_queue_use_case: ProcessQueueUseCase | None = None,
-    progress_tracker: ProgressTracker | None = None,
+    process_queue_use_case: Optional[ProcessQueueUseCase] = None,
+    progress_tracker: Optional[ProgressTracker] = None,
 ) -> FastAPI:
     app = FastAPI(title="PodLitPy Task Queue API")
     app.state.use_case = use_case
