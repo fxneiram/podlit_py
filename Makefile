@@ -1,4 +1,4 @@
-.PHONY: install install-ffmpeg install-espeak-ng install-deps install-dev-deps install-magpie create-env activate-env run
+.PHONY: install install-ffmpeg install-espeak-ng install-deps install-dev-deps install-magpie create-env activate-env run run-api
 
 # Default target when 'make' is run without arguments
 all: install
@@ -67,6 +67,11 @@ run:
 	@echo "Running the application..."
 	python app.py
 
+# Run the task queue REST API (separate from the Tkinter app; see api_server.py)
+run-api:
+	@echo "Running the task queue API on http://127.0.0.1:8000 ..."
+	python api_server.py
+
 # Clean up temporary files
 clean:
 	@echo "Cleaning up..."
@@ -84,5 +89,6 @@ help:
 	@echo "  install-dev-deps : Install Python dependencies plus dev tools (ruff/mypy/pytest)"
 	@echo "  install-magpie  : Install MagpieTTS's nemo_toolkit dependency (optional, not part of 'install')"
 	@echo "  run             : Run the application"
+	@echo "  run-api         : Run the task queue REST API"
 	@echo "  clean           : Clean up temporary files"
 	@echo "  help            : Show this help message"

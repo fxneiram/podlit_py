@@ -12,3 +12,7 @@ class TTSEngineUnavailableError(Exception):
 
 class LanguageNotSupportedError(Exception):
     """Raised when a requested language has no locale/voice mapping for the current engine."""
+
+
+class TaskNotFoundError(Exception):
+    """Raised when a requested task id doesn't exist in the queue."""

@@ -22,3 +22,8 @@ FPS = 24
 # "coqui" (default, always available) or "magpie" (requires nemo_toolkit installed separately -
 # see `make install-magpie` - not part of the default install).
 TTS_ENGINE = os.environ.get("TTS_ENGINE", "coqui")
+
+# TASK QUEUE API
+# Single JSON file backing the REST API's task queue (adapters/driving/api). Independent of
+# WindowTaskQueueManager's own in-memory + pickle .que save/load - the two aren't unified yet.
+QUEUE_STORAGE_PATH = os.environ.get("QUEUE_STORAGE_PATH", os.path.join(os.getcwd(), "queue_storage.json"))
