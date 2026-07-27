@@ -1,14 +1,31 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+import asyncio
+import json
+from dataclasses import asdict
 
-from adapters.driving.api.schemas import QueueReplaceRequest, TaskCreateRequest, TaskResponse
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import StreamingResponse
+
+from adapters.driving.api.schemas import QueueProcessRequest, QueueReplaceRequest, TaskCreateRequest, TaskResponse
 from application.use_cases.manage_task_queue_use_case import ManageTaskQueueUseCase
-from domain.exceptions import TaskNotFoundError
+from application.use_cases.process_queue_use_case import ProcessQueueUseCase
+from domain.exceptions import QueueAlreadyProcessingError, TaskNotFoundError
+from domain.progress_tracker import ProgressTracker
+
+PROGRESS_POLL_INTERVAL_SECONDS = 0.2
 
 router = APIRouter()
 
 
 def get_use_case(request: Request) -> ManageTaskQueueUseCase:
     return request.app.state.use_case
+
+
+def get_process_queue_use_case(request: Request) -> ProcessQueueUseCase:
+    return request.app.state.process_queue_use_case
+
+
+def get_progress_tracker(request: Request) -> ProgressTracker:
+    return request.app.state.progress_tracker
 
 
 def _to_response(record) -> TaskResponse:
@@ -69,3 +86,31 @@ def replace_queue(body: QueueReplaceRequest, use_case: ManageTaskQueueUseCase = 
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
     return [_to_response(record) for record in records]
+
+
+@router.post("/queue/process", status_code=202)
+def process_queue(
+    body: QueueProcessRequest,
+    process_queue_use_case: ProcessQueueUseCase = Depends(get_process_queue_use_case),
+):
+    try:
+        process_queue_use_case.start(task_delay_ms=body.task_delay_ms, mix_queue=body.mix_queue)
+    except QueueAlreadyProcessingError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+    return {"status": "started"}
+
+
+@router.get("/queue/progress")
+async def queue_progress(progress_tracker: ProgressTracker = Depends(get_progress_tracker)):
+    async def event_stream():
+        last_state = None
+        while True:
+            state = progress_tracker.state
+            if state != last_state:
+                yield f"data: {json.dumps(asdict(state))}\n\n"
+                last_state = state
+            if state.status == "completed":
+                break
+            await asyncio.sleep(PROGRESS_POLL_INTERVAL_SECONDS)
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")

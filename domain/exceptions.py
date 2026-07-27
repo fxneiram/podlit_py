@@ -16,3 +16,7 @@ class LanguageNotSupportedError(Exception):
 
 class TaskNotFoundError(Exception):
     """Raised when a requested task id doesn't exist in the queue."""
+
+
+class QueueAlreadyProcessingError(Exception):
+    """Raised when queue processing is started while a previous run is still in progress."""
