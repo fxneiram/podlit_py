@@ -2,13 +2,27 @@ import asyncio
 import json
 from dataclasses import asdict
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi.responses import StreamingResponse
 
-from adapters.driving.api.schemas import QueueProcessRequest, QueueReplaceRequest, TaskCreateRequest, TaskResponse
+from adapters.driving.api.schemas import (
+    QueueProcessRequest,
+    QueueReplaceRequest,
+    SelectVoiceRequest,
+    SetSpeedRequest,
+    TaskCreateRequest,
+    TaskResponse,
+    VoicesResponse,
+)
 from application.use_cases.manage_task_queue_use_case import ManageTaskQueueUseCase
+from application.use_cases.manage_voices_use_case import ManageVoicesUseCase
 from application.use_cases.process_queue_use_case import ProcessQueueUseCase
-from domain.exceptions import QueueAlreadyProcessingError, TaskNotFoundError
+from domain.exceptions import (
+    QueueAlreadyProcessingError,
+    TaskNotFoundError,
+    VoiceNotFoundError,
+    VoiceUploadNotSupportedError,
+)
 from domain.progress_tracker import ProgressTracker
 
 PROGRESS_POLL_INTERVAL_SECONDS = 0.2
@@ -26,6 +40,10 @@ def get_process_queue_use_case(request: Request) -> ProcessQueueUseCase:
 
 def get_progress_tracker(request: Request) -> ProgressTracker:
     return request.app.state.progress_tracker
+
+
+def get_manage_voices_use_case(request: Request) -> ManageVoicesUseCase:
+    return request.app.state.manage_voices_use_case
 
 
 def _to_response(record) -> TaskResponse:
@@ -114,3 +132,39 @@ async def queue_progress(progress_tracker: ProgressTracker = Depends(get_progres
             await asyncio.sleep(PROGRESS_POLL_INTERVAL_SECONDS)
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
+@router.get("/voices", response_model=VoicesResponse)
+def list_voices(use_case: ManageVoicesUseCase = Depends(get_manage_voices_use_case)):
+    return VoicesResponse(voices=use_case.list_voices())
+
+
+@router.post("/voices", response_model=VoicesResponse, status_code=201)
+async def upload_voice(
+    file: UploadFile = File(...),
+    use_case: ManageVoicesUseCase = Depends(get_manage_voices_use_case),
+):
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Uploaded file has no filename")
+
+    content = await file.read()
+    try:
+        use_case.upload_voice(file.filename, content)
+    except (VoiceUploadNotSupportedError, ValueError) as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    return VoicesResponse(voices=use_case.list_voices())
+
+
+@router.post("/settings/voice")
+def select_voice(body: SelectVoiceRequest, use_case: ManageVoicesUseCase = Depends(get_manage_voices_use_case)):
+    try:
+        use_case.select_voice(body.voice)
+    except VoiceNotFoundError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+    return {"status": "ok"}
+
+
+@router.post("/settings/speed")
+def set_speed(body: SetSpeedRequest, use_case: ManageVoicesUseCase = Depends(get_manage_voices_use_case)):
+    use_case.set_speed(body.speed)
+    return {"status": "ok"}

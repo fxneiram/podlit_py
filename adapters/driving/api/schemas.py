@@ -22,3 +22,15 @@ class QueueReplaceRequest(BaseModel):
 class QueueProcessRequest(BaseModel):
     task_delay_ms: int = 0
     mix_queue: bool = False
+
+
+class VoicesResponse(BaseModel):
+    voices: list[str]
+
+
+class SelectVoiceRequest(BaseModel):
+    voice: str
+
+
+class SetSpeedRequest(BaseModel):
+    speed: float
