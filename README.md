@@ -1,5 +1,7 @@
 # PodLitPy
 
+[![CI](https://github.com/fxneiram/podlit_py/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/fxneiram/podlit_py/actions/workflows/ci.yml)
+
 ## Description
 
 I created this project to generate multimedia content for practicing my English. The main idea is to use a tool like ChatGPT with the prompt provided below. The generated content can be summaries of books or any other topic that the user finds relevant and enjoyable. The output is produced in both audio (WAV) and video (MP4) formats, making it easier to listen and learn in English.
