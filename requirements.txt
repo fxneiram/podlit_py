@@ -1,0 +1,20 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.8.0
+torchaudio==2.8.0
+
+# TTS==0.22.0's own transitive dependencies keep releasing Python-3.10-only versions without
+# declaring it in package metadata (confirmed the hard way in #35/PR #48) - pin them ahead of
+# TTS so this resolves consistently instead of drifting to whatever's "latest" today.
+spacy<3.8
+bangla<0.0.3
+TTS==0.22.0
+
+# TTS==0.22.0 itself pins numpy==1.22.0 (exact) for python_version<=3.10 - pip's resolver
+# rejects any other numpy version here (confirmed: numpy==1.26.4, this Makefile's previous
+# pin, is NOT actually TTS's own requirement - it only "worked" before because the Makefile
+# installed numpy last, silently overriding whatever TTS's install had already set up).
+# opencv-python>=4.12.0.88 requires numpy>=2 on Python >=3.9, incompatible with numpy 1.x
+# entirely - 4.11.0.86 is the newest version still compatible with numpy==1.22.0.
+opencv-python==4.11.0.86
+pydub==0.25.1
+numpy==1.22.0

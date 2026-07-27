@@ -19,9 +19,13 @@ Individual targets, useful when only part of the setup is broken:
 - `make create-env` — creates a conda env named `tts` on Python 3.9. TTS/torch on this
   project pin to older, CPU-friendly versions, so this env should not be reused for
   unrelated Python work.
-- `make install-deps` — installs, in order: `torch`/`torchaudio` (CPU wheels), `TTS==0.22.0`,
-  `opencv-python`, `pydub`, `numpy==1.26.4`. The numpy pin matters: newer numpy breaks TTS 0.22.0's
-  C extensions.
+- `make install-deps` — resolves `requirements.txt` in a single `pip install -r` call:
+  `torch`/`torchaudio` (CPU wheels), `TTS==0.22.0`, `opencv-python==4.11.0.86`, `pydub`,
+  `numpy==1.22.0`. The numpy pin matters and is exact for a reason: `TTS==0.22.0` itself
+  declares `numpy==1.22.0` as a hard dependency (confirmed by trying to resolve any other numpy
+  version alongside it — pip's resolver rejects it outright), and `opencv-python>=4.12.0.88`
+  requires `numpy>=2`, which is why that package is pinned below its own latest release too.
+  See `requirements.txt`'s comments for the full reasoning.
 
 Always `conda activate tts` before running anything below — the app imports `TTS.api` and
 `torch` directly, so it will fail outside this env.

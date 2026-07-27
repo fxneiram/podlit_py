@@ -18,8 +18,8 @@ class MagpieTTSAdapter(TextToSpeechPort):
     `.save()`). This is a large (~2.2GB), unpinned dependency deliberately NOT added to this
     project's Makefile/CI (see specs/magpie-tts-adapter.md) - use `make install-magpie`, ideally
     in a separate conda env/venv from your main `tts` env: nemo_toolkit's own unpinned
-    requirements can upgrade the CPU-pinned torch/torchaudio (and possibly numpy==1.26.4) that
-    `make install-deps` set up for Coqui/eSpeak-NG.
+    requirements can upgrade the CPU-pinned torch/torchaudio (and possibly numpy==1.22.0 - see
+    requirements.txt) that `make install-deps` set up for Coqui/eSpeak-NG.
 
     Deliberate limitation, confirmed with the user: MagpieTTS's public API has NO prosody
     control whatsoever - no SSML, no style/tone description, not even a numeric speed knob.
