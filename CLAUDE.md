@@ -39,8 +39,9 @@ normal pytest way once tests exist: `pytest tests/unit/test_foo.py::test_bar`.
 every PR into `develop` — `ruff`/`mypy` are advisory for now since the legacy code predates
 these standards (see `coding-standards.md` below), `pytest` is blocking.
 
-Dependency versions are pinned deliberately (`torch`/`torchaudio` CPU wheels, `TTS==0.22.0`,
-`numpy==1.26.4`) — newer numpy breaks TTS 0.22.0's C extensions. Don't bump these without reason.
+Dependency versions are pinned deliberately in `requirements.txt` (`torch`/`torchaudio` CPU
+wheels, `TTS==0.22.0`, `numpy==1.22.0` — `TTS==0.22.0` declares this exact numpy version as its
+own dependency; anything else fails `pip`'s resolver outright). Don't bump these without reason.
 
 ## Architecture
 
