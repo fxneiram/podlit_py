@@ -3,3 +3,6 @@
 ruff==0.16.0
 mypy==1.11.2
 pytest==7.4.4
+
+# Needed for fastapi.testclient.TestClient - not required to actually run the API server
+httpx==0.28.1

@@ -18,3 +18,9 @@ TTS==0.22.0
 opencv-python==4.11.0.86
 pydub==0.25.1
 numpy==1.22.0
+
+# Task queue REST API (adapters/driving/api) - verified installable/compatible alongside the
+# rest of this file's pins in a real Python 3.9 venv, no conflicts.
+fastapi==0.128.8
+uvicorn==0.39.0
+pydantic==2.13.4
