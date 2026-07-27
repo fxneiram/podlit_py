@@ -40,19 +40,20 @@ class Task:
     def validate_input(text):
         try:
             parsed_text = ast.literal_eval(text)
-            if not isinstance(parsed_text, dict):
-                raise ValueError("Input must be a dictionary.")
+        except (ValueError, SyntaxError) as e:
+            raise ValueError(f"Input is not a valid Python literal: {e}") from e
 
-            for key, value in parsed_text.items():
-                if not isinstance(key, int):
-                    raise ValueError(f"Key {key} is not an integer.")
-                if "text" not in value or "language" not in value:
-                    raise ValueError(f"Entry {key} is incorrectly formatted.")
-                if not isinstance(value["text"], str) or not isinstance(value["language"], str):
-                    raise ValueError(f"'text' or 'language' in {key} are not strings.")
-            return parsed_text
-        except Exception as e:
-            return e
+        if not isinstance(parsed_text, dict):
+            raise ValueError("Input must be a dictionary.")
+
+        for key, value in parsed_text.items():
+            if not isinstance(key, int):
+                raise ValueError(f"Key {key} is not an integer.")
+            if "text" not in value or "language" not in value:
+                raise ValueError(f"Entry {key} is incorrectly formatted.")
+            if not isinstance(value["text"], str) or not isinstance(value["language"], str):
+                raise ValueError(f"'text' or 'language' in {key} are not strings.")
+        return parsed_text
 
     def __repr__(self):
         return f"Task(name={self.name!r}, index={self.index!r}, rows={self.rows})"

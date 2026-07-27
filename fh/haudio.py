@@ -1,7 +1,7 @@
-import subprocess
+import logging
 
 from pydub import AudioSegment
-from tqdm import tqdm
+
 from pkg import config as cfg
 
 
@@ -18,7 +18,7 @@ class AudioManager:
             combined += segment + silence
 
         combined.export(output_path, format="wav")
-        print(f"Combined audio exported to: {output_path}")
+        logging.info("Combined audio exported to: %s", output_path)
 
     def add_silence(self, audio_path, duration, fps, before=True, after=True):
         audio = AudioSegment.from_wav(audio_path)
